@@ -20,9 +20,14 @@ monorting.
 The Performance WG is made up of volunteers, you do not need to be a member to participate, but once you participate
 please open a PR to add youself here.
 
+Two teams exist for mentioning the group and managing access:
+
+- @expressjs/perf-wg: everyone participating in the WG has write access to this repo
+- @expressjs/perf-wg-captains: the repository captians as per Express project guidelines
+
 ### Team Members
 
-- [Wes Todd](https://github.com/wesleytodd)
+- [Wes Todd](https://github.com/wesleytodd) (Captain)
 
 ## Meetings
 

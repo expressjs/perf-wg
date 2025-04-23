@@ -28,6 +28,10 @@ Two teams exist for mentioning the group and managing access:
 ### Team Members
 
 - [Wes Todd](https://github.com/wesleytodd) (Captain)
+- [Chris de Almeida](https://github.com/ctcpip)
+- [Jean Burellier](https://github.com/sheplu)
+- [Sebastian Beltran](https://github.com/bjohansebas)
+- [Ulises Gascón](https://github.com/ulisesGascon)
 
 ## Meetings
 

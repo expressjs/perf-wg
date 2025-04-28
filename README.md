@@ -3,7 +3,7 @@
 ## Charter
 
 The Performance Working Group manages all aspects and processes linked to the Express Project's performance tooling and
-monorting.
+monitoring.
 
 ### Responsibilities
 

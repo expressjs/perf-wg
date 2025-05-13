@@ -1,0 +1,20 @@
+{
+  "name": "@expressjs/perf-cli",
+  "version": "1.0.0",
+  "main": "bin/expf.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "expf": "./bin/expf.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@pkgjs/nv": "^0.2.2",
+    "autocannon": "^8.0.0",
+    "autocannon-compare": "^0.4.0"
+  }
+}

@@ -19,6 +19,7 @@ We focus on **evaluation, not prescription**. Rather than dictating how to write
 - Create standards for testing under various conditions (concurrency, payload size, middleware stack)
 
 #### Tooling & Infrastructure
+- Tooling: [see Perf CLI Readme.md](./packages/cli/README.md)
 - Provide environments and tools to make measurements possible
 - Help contributors run performance tests and interpret results
 - Maintain two categories of tests:

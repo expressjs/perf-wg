@@ -1,0 +1,16 @@
+{
+  "name": "@expressjs/perf-runner-docker",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "node --run build",
+    "build": "./scripts/build.sh 22.17.0 bookworm expf-runner:20.17.0-bookworm",
+    "run": "./scripts/run.sh",
+    "tag": "docker tag perf-runner:latest registry.digitalocean.com/real-expressjs/perf-runner"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "A set of utilities for Express to work with DigitalOcean"
+}

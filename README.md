@@ -33,6 +33,7 @@ Two teams exist for mentioning the group and managing access:
 - [Sebastian Beltran](https://github.com/bjohansebas)
 - [Ulises Gascón](https://github.com/ulisesGascon)
 - [Murat Kirazkaya](https://github.com/GroophyLifefor)
+- [Luke Lucas](https://github.com/O4FDev)
 
 ## Meetings
 

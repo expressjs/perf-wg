@@ -47,5 +47,5 @@ in the [OpenJS Foundation Slack](https://openjsf.org/collaboration) for realtime
 
 ## Code of Conduct
 
-The [Express Project's CoC](https://github.com/expressjs/express/blob/master/Code-Of-Conduct.md) applies to this repo.
+The [Express Project's CoC](https://github.com/expressjs/express?tab=coc-ov-file#readme) applies to this repo.
 

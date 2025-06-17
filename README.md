@@ -7,6 +7,7 @@ monitoring.
 
 ### Responsibilities
 
+- Tooling: [see Perf CLI Readme.md](./packages/cli/README.md)
 - TBD
 
 ## Current Initiatives

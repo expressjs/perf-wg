@@ -1,6 +1,5 @@
 name: Schedule Meeting
 on:
-  pull_request:
   push:
     branches:
       - main
@@ -20,6 +19,6 @@ jobs:
           meetingLabels: 'meeting'
           # https://github.com/expressjs/perf-wg/issues/2
           # Starting on 2025-05-14 at 3:00pm UTC with a period of 4 weeks (P4W)
-          schedules: '2025-05-14T15:00:00.0Z/P4W'
-          createWithin: 'P1W'
+          schedules: '2025-05-14T15:00:00.0Z/P2W'
+          createWithin: 'P2W'
           issueTemplate: 'meeting.md'

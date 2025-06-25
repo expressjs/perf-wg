@@ -1,0 +1,24 @@
+{
+  "name": "@expressjs/perf-wg",
+  "version": "1.0.0",
+  "description": "ExpressJS Performance Working Group",
+  "scripts": {
+    "setup": "npm i",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:load": "expf load --test=@expressjs/perf-load-example",
+    "test:load:node": "expf load --test=@expressjs/perf-load-node-http",
+    "compare": "expf compare"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/expressjs/perf-wg.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "workspaces": [
+    "./packages/*",
+    "./perf/load/*",
+    "./perf/bench/*"
+  ]
+}

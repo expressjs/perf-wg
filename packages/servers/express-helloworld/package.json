@@ -1,0 +1,11 @@
+{
+  "name": "@expressjs/perf-servers-express-helloworld",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm i"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

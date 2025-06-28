@@ -1,0 +1,16 @@
+{
+  "name": "@expressjs/perf-load-node-http",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "setup": "npm i"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@expressjs/perf-requests": "file:../../../packages/requests",
+    "@expressjs/perf-servers": "file:../../../packages/servers"
+  }
+}

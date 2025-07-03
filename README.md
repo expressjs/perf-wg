@@ -62,7 +62,7 @@ Two teams exist for mentioning the group and managing access:
 
 ## Meetings
 
-The Performance Working Group meets bi-weekly (2nd and 4th Wednesdays). The meeting is open to the public. The agenda and meeting notes
+The Performance Working Group meets bi-weekly (see [meeting issues](https://github.com/expressjs/perf-wg/issues?q=is%3Aissue%20state%3Aopen%20label%3Ameeting)). The meeting is open to the public. The agenda and meeting notes
 are published in this repository. You can find the calendar entries in the [OpenJS Foundation calendar](https://openjsf.org/collaboration).
 
 ## Offline Discussions

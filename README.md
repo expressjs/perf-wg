@@ -59,6 +59,7 @@ Two teams exist for mentioning the group and managing access:
 - [Sebastian Beltran](https://github.com/bjohansebas)
 - [Ulises Gascón](https://github.com/ulisesGascon)
 - [Murat Kirazkaya](https://github.com/GroophyLifefor)
+- [Andre Ferreira](https://github.com/andrehrferreira)
 
 ## Meetings
 

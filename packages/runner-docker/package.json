@@ -5,8 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "node --run build",
-    "build": "./scripts/build.sh",
-    "run": "./scripts/run.sh",
+    "build": "node ./scripts/build.mjs",
+    "run": "node ./scripts/run.mjs",
+    "start": "node ./scripts/start.mjs",
     "tag": "docker tag perf-runner:latest registry.digitalocean.com/real-expressjs/perf-runner"
   },
   "keywords": [],

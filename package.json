@@ -4,10 +4,11 @@
   "description": "ExpressJS Performance Working Group",
   "scripts": {
     "setup": "npm i",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "test:load": "expf load --test=@expressjs/perf-load-example",
-    "test:load:node": "expf load --test=@expressjs/perf-load-node-http",
-    "compare": "expf compare"
+    "runner:build": "npm run build --prefix ./packages/runner-docker",
+    "runner:run": "npm run run --prefix ./packages/runner-docker",
+    "test:load": "npx expf load --test=@expressjs/perf-load-example",
+    "test:load:node": "npx expf load --test=@expressjs/perf-load-node-http",
+    "compare": "npx expf compare"
   },
   "repository": {
     "type": "git",

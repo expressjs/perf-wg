@@ -28,29 +28,20 @@ export default function main (_opts = {}) {
       repoRef: 'master',
       runner: '@expressjs/perf-runner-docker',
       test: '@expressjs/perf-load-example',
-      ..._opts
+      ..._opts,
+      // Map CLI parameter names to expected names
+      repoRef: _opts['repo-ref'] || _opts.repoRef || 'master'
     };
 
     let completed = false;
 
     // Setup some process and error handling
     const ac = opts.abortController ?? new AbortController();
-    process.on('uncaughtException', () => {
-      ac.abort();
-    });
-    process.on('unhandledRejection', () => {
-      ac.abort();
-    });
     process.on('SIGINT', () => {
       ac.abort();
     });
     process.on('SIGTERM', () => {
       ac.abort();
-    });
-    process.on('beforeExit', () => {
-      if (!completed) {
-        ac.abort();
-      }
     });
     if (ac.signal.aborted) {
       return reject(ac.signal.reason);
@@ -66,20 +57,24 @@ export default function main (_opts = {}) {
       const results = await runner({
         cwd: opts.cwd,
         repo: opts.repo,
+        repoRef: opts.repoRef,
         test: opts.test,
         signal: ac.signal
       });
+      console.log('end');
 
       const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
       await mkdir(dirname(outputFile), { recursive: true });
       await writeFile(outputFile, JSON.stringify(results, null, 2));
       console.log(inspect(results, { depth: null }));
       console.log(`written to: ${outputFile}`);
+      
+      completed = true;
+      resolve();
     } catch (e) {
-      console.error(e);
+      console.error('Load test failed:', e.message);
+      completed = true;
+      reject(e);
     }
-    completed = true;
-
-    resolve();
   });
 }

@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "expf": "./bin/expf.sh"
+    "expf": "./bin/expf.mjs"
   },
   "keywords": [],
   "author": "",

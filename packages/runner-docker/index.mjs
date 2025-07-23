@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import os from 'node:os';
 import ac from '@expressjs/perf-autocannon';
+import { collectMetadata } from '@expressjs/perf-collect-metadata';
 import nv from '@pkgjs/nv';
 
 export function buildContainer (opts = {}) {
@@ -141,14 +141,7 @@ export async function startClient (_opts = {}, server) {
 
   return {
     metadata: {
-      cpus: os.cpus(),
-      totalmem: os.totalmem(),
-      arch: os.arch(),
-      machine: os.machine(),
-      platform: os.platform(),
-      release: os.release(),
-      type: os.type(),
-      version: os.version(),
+      ...collectMetadata(),
       // TODO: autocannon settings
     },
     close: async () => {

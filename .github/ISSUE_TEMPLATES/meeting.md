@@ -21,14 +21,9 @@
 Or in your local time:
 * https://www.timeanddate.com/worldclock/?iso=<%= date.toFormat("yyyy-MM-dd'T'HH:mm:ss") %>
 
-## Links
-
-* Minutes Google Doc:
-
 ## Agenda
 
 Extracted from **<%= agendaLabel %>** labelled issues and pull requests from **<%= owner %>/<%= repo %>** prior to the meeting.
-
 
 <%= agendaIssues.map((i) => {
   return `* ${i.html_url}`
@@ -40,12 +35,11 @@ Extracted from **<%= agendaLabel %>** labelled issues and pull requests from **<
 
 ### Observers/Guests
 
-This meeting is open for anyone who wants to attend. Reminder to follow our [Code of Conduct](https://github.com/expressjs/express/blob/master/Code-Of-Conduct.md).
+This meeting is open for anyone who wants to attend. Reminder to follow our [Code of Conduct](https://github.com/expressjs/.github/blob/master/CODE_OF_CONDUCT.md).
 
-### Joining the meeting
+## Joining the meeting
 
-* link for participants: https://zoom-lfx.platform.linuxfoundation.org/meeting/93099394904?password=d712f2e5-4fc9-45d1-99c5-fd762b885588
-* For those who just want to watch: https://www.youtube.com/@expressjs-official
+* link for participants: https://zoom-lfx.platform.linuxfoundation.org/meeting/96601939832?password=ffe66d99-9a98-402a-bef7-c1ab962dbe58
 
 ---
 
@@ -55,4 +49,3 @@ availability.
 - 👍 - Attending
 - 👎 - Not attending
 - 😕 - Not sure yet
-

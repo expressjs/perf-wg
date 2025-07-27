@@ -1,5 +1,5 @@
 {
-  "name": "@expressjs/perf-collect-metadata",
+  "name": "@expressjs/perf-metadata",
   "version": "1.0.0",
   "type": "module",
   "main": "collectMetadata.mjs"

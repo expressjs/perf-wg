@@ -10,6 +10,8 @@ if [ -z "$2" ]; then
   exit 1;
 fi;
 
+rollup metadata.mjs --file metadata-bundle.mjs --plugin @rollup/plugin-node-resolve
+
 # Start docker daemon if not running
 if (! docker stats --no-stream >/dev/null 2>&1 ); then
   # On Mac OS this would be the terminal command to launch Docker

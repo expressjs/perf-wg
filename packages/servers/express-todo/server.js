@@ -423,7 +423,11 @@ app.use((req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.error(`Error starting server: ${err.message}`)
+    process.exit(1)
+  }
   console.log(`Todo API server listening on port ${PORT}`);
   console.log(`PID: ${process.pid}`);
   console.log(`Node version: ${process.version}`);

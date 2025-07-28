@@ -4,7 +4,7 @@
   "exports": {
     "./node-http": "./node-http/index.mjs",
     "./express-helloworld": "./express-helloworld/index.js",
-    "./express-extended-query": "./express-extended-query/index.js"
+    "./express-extended-query": "./express-extended-query/index.js",
     "./express-todo": "./express-todo/server.js"
   },
   "scripts": {

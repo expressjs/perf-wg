@@ -12,5 +12,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "A set of utilities for Express to work with DigitalOcean"
+  "description": "A set of utilities for Express to work with DigitalOcean",
+  "dependencies": {
+    "@expressjs/perf-autocannon": "^1.0.0",
+    "@expressjs/perf-metadata": "^1.0.0",
+    "@pkgjs/nv": "^0.2.2"
+  }
 }

@@ -2,7 +2,7 @@ import { execFile } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import ac from '@expressjs/perf-autocannon';
-import { collectMetadata } from '@expressjs/perf-collect-metadata';
+import { collectMetadata } from '@expressjs/perf-metadata';
 import nv from '@pkgjs/nv';
 
 export function buildContainer (opts = {}) {
@@ -140,10 +140,8 @@ export async function startClient (_opts = {}, server) {
   });
 
   return {
-    metadata: {
-      ...collectMetadata(),
-      // TODO: autocannon settings
-    },
+    // TODO: autocannon settings
+    metadata: collectMetadata(),
     close: async () => {
       cannon.stop?.();
     },

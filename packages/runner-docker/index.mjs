@@ -14,15 +14,15 @@ export function buildContainer (opts = {}) {
     const cp = execFile(
       join(import.meta.dirname, 'scripts', 'build.sh'),
       [
-        opts.node || 'lts',
+        nodeVer,
         os
       ],
       { cwd: import.meta.dirname }
     );
     cp.on('exit', () => {
       resolve({
-        tag: `expf-runner:${opts.node}-${os}`,
-        node: opts.node
+        tag: `expf-runner:${nodeVer}-${os}`,
+        node: nodeVer
       });
     });
     cp.on('error', reject);

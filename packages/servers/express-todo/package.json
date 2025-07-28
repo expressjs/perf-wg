@@ -1,11 +1,12 @@
 {
-  "name": "perf-todo",
+  "name": "@expressjs/perf-servers-express-todo",
   "version": "1.0.0",
   "description": "Todo API reference app for Express performance benchmarking",
   "main": "server.js",
   "scripts": {
+    "setup": "npm i",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "node --watch server.js"
   },
   "keywords": [
     "express",
@@ -23,8 +24,5 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "morgan": "^1.10.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.10"
   }
 }

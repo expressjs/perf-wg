@@ -1,3 +1,4 @@
+const start = process.hrtime();
 const express = require('express');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
@@ -426,6 +427,7 @@ const server = app.listen(PORT, () => {
   console.log(`Todo API server listening on port ${PORT}`);
   console.log(`PID: ${process.pid}`);
   console.log(`Node version: ${process.version}`);
+  console.log(`startup: ${process.hrtime(start)}`);
 });
 
 // Graceful shutdown

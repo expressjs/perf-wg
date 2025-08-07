@@ -1,28 +1,31 @@
 name: Schedule Meeting
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  pull_request:
+      paths:
+        - '.github/workflows/meetings.yml'
+        - '.github/ISSUE_TEMPLATE/meeting.md'
   schedule:
     - cron: '0 0 * * *'
+
 permissions:
   issues: write
   contents: read
+
 jobs:
   meeting:
     runs-on: ubuntu-latest
     steps:
       - name: Perf WG Meeting
-        uses: 'pkgjs/meet@v0'
+        uses: 'pkgjs/meet@v1'
         with:
-          issueTitle: '<%= date.toFormat("yyyy-MM-dd") %> Express Performance Working Group Meeting'
+          issueTitle: '<%= date.toZonedDateTimeISO("UTC").toPlainDate().toString() %> Express Performance Working Group Meeting'
           token: ${{ secrets.GITHUB_TOKEN }}
           orgs: expressjs,pillarjs,jshttp
           agendaLabel: 'perf-wg-agenda'
           meetingLabels: 'meeting'
-          # https://github.com/expressjs/perf-wg/issues/2
-          # Starting on 2025-05-14 at 3:00pm UTC with a period of 4 weeks (P4W)
-          schedules: '2025-05-14T15:00:00.0Z/P2W'
+          # Monday 10 AM America/Chicago with a period of 2 weeks (P2W)
+          schedules: '2025-08-07T10:00:00.0[America/Chicago]/P2W'
           createWithin: 'P2W'
+          meetingLink: 'https://zoom-lfx.platform.linuxfoundation.org/meeting/96601939832?password=ffe66d99-9a98-402a-bef7-c1ab962dbe58'
           issueTemplate: 'meeting.md'

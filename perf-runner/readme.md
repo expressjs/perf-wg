@@ -96,7 +96,7 @@ jobs:
             -e COMMENTTOKEN=$COMMENTTOKEN \
             -e REPOSITORY_OWNER=$REPOSITORY_OWNER \
             -e REPOSITORY=$REPOSITORY \
-            muratkirazkaya/perf-runner:latest \
+            <docker-hub-username>/perf-runner:latest \
             bash -c "source /root/.nvm/nvm.sh && \
                     nvm install $NODE_VERSION && \
                     nvm use $NODE_VERSION && \

@@ -1,0 +1,15 @@
+# Ignore files not needed in Docker image
+node_modules/
+npm-debug.log
+.git/
+.gitignore
+*.md
+!README.md
+.DS_Store
+*.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+run-tests.mjs.original

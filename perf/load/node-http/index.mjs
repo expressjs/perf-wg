@@ -1,5 +1,5 @@
 export async function requests () {
-  return (await import('@expressjs/perf-requests/get-basic-paths').default);
+  return (await import('@expressjs/perf-requests/get-basic-paths')).default;
 }
 
 export function server () {

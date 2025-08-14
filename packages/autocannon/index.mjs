@@ -18,7 +18,7 @@ export default async function main (_opts = {}) {
     // them centralized in case we have multiple
     // client implementations or runners.
     url: 'http://localhost:3000',
-    duration: 30,
+    duration: 60,
     connections: 100,
     ..._opts
   };

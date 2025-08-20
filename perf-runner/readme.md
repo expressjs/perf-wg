@@ -1,7 +1,7 @@
 # Performance Runner Proposal
 
 > **Proposal Status**: Under Review  
-> **Working Group**: OpenJS Express Performance Testing Working Group  
+> **Working Group**: Express Performance Testing Working Group  
 
 ## Overview
 

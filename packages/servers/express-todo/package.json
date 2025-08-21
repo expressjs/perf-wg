@@ -1,0 +1,28 @@
+{
+  "name": "@expressjs/perf-servers-express-todo",
+  "version": "1.0.0",
+  "description": "Todo API reference app for Express performance benchmarking",
+  "main": "server.js",
+  "scripts": {
+    "setup": "npm i",
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "express",
+    "performance",
+    "benchmark",
+    "todo"
+  ],
+  "author": "jonchurch",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "compression": "^1.8.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0"
+  }
+}

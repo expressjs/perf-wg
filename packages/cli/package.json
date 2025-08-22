@@ -6,14 +6,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "expf": "./bin/expf.sh"
+    "expf": "./bin/expf.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@pkgjs/nv": "^0.2.2",
     "autocannon": "^8.0.0",
     "autocannon-compare": "^0.4.0"
   }

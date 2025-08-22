@@ -11,11 +11,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Setup @mmarchini/observe
-RUN <<-EOF
-  npm install -g @mmarchini/observe@^3.0.0
-  chown -R node:node /usr/local/lib/node_modules
-  chown -R node:node /usr/local/bin/observe
-EOF
+RUN npm install -g @mmarchini/observe@^3.0.0 && \
+    chown -R node:node /usr/local/lib/node_modules && \
+    chown -R node:node /usr/local/bin/observe
 
 USER node
 WORKDIR /home/node
@@ -26,6 +24,10 @@ RUN git clone https://github.com/brendangregg/FlameGraph.git
 VOLUME ["/home/node/repo"]
 VOLUME ["/home/node/results"]
 EXPOSE 3000 9229
+
+# Create results directory with proper ownership
+RUN mkdir -p /home/node/results && chown -R node:node /home/node/results
+
 COPY metadata.mjs metadata.mjs
-COPY scripts/start.sh start.sh
-ENTRYPOINT ["./start.sh"]
+COPY scripts/start.mjs start.mjs
+ENTRYPOINT ["node", "start.mjs"]

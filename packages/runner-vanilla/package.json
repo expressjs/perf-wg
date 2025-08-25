@@ -1,0 +1,21 @@
+{
+  "name": "@expressjs/perf-runner-vanilla",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "node --run build",
+    "build": "node --run shared:build",
+    "run": "node --run shared:run",
+    "shared:build": "../runner-shared/scripts/build.sh 22.18.0 bookworm vanilla",
+    "shared:run": "../runner-shared/scripts/run.sh"
+  },
+  "keywords": ["express", "performance", "benchmark", "vanilla", "node"],
+  "author": "",
+  "license": "ISC",
+  "description": "Vanilla Node.js runner for Express performance benchmarks",
+  "dependencies": {
+    "@expressjs/perf-runner-shared": "^1.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@expressjs/perf-runner-nsolid",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "node --run build",
+    "build": "node --run shared:build",
+    "run": "node --run shared:run",
+    "shared:build": "../runner-shared/scripts/build.sh iron latest nsolid",
+    "shared:run": "../runner-shared/scripts/run.sh"
+  },
+  "keywords": ["express", "performance", "benchmark", "nsolid", "nodesource"],
+  "author": "",
+  "license": "ISC",
+  "description": "N|Solid runner for Express performance benchmarks with built-in monitoring",
+  "dependencies": {
+    "@expressjs/perf-runner-shared": "^1.0.0"
+  }
+}

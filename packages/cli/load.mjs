@@ -1,6 +1,6 @@
 import { normalize, join, dirname } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { inspect } from 'node:util';
+import nv from '@pkgjs/nv';
 
 export function help (opts = {}) {
   return `$ expf load [flags]
@@ -69,11 +69,15 @@ export default function main (_opts = {}) {
     const runner = (await import(opts.runner)).default;
 
     try {
+      const vers = await nv(opts.node, {
+        latestOfMajorOnly: true
+      });
+
       const results = await runner({
         cwd: opts.cwd,
         repo: opts.repo,
         test: opts.test,
-        node: opts.node,
+        node: vers?.[0]?.version,
         overrides: opts.overrides,
         signal: ac.signal
       });

@@ -119,7 +119,7 @@ trap on_sigint SIGINT
 
 echo "Starting server (server ${SERVER_PID}, perf ${PERF_PID})"
 while true; do
-  # Server process ehelloworldxited
+  # Server process exited
   if ! [ -d "/proc/${SERVER_PID}" ]; then
     echo "Exited prematurely (pid ${SERVER_PID}, code ${EXIT_CODE-unknown})"
     wait $SERVER_PID || true

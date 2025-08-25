@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "./scripts/build.sh 22.18.0 bookworm --force",
+    "prepare": "rollup metadata.mjs --file metadata-bundle.mjs --plugin @rollup/plugin-node-resolve",
     "run": "./scripts/run.sh",
     "tag": "docker tag perf-runner:latest registry.digitalocean.com/real-expressjs/perf-runner"
   },
@@ -13,11 +14,10 @@
   "license": "ISC",
   "description": "A set of utilities for Express to work with DigitalOcean",
   "dependencies": {
-    "@expressjs/perf-autocannon": "^1.0.0",
-    "@expressjs/perf-metadata": "^1.0.0",
-    "@pkgjs/nv": "^0.2.2"
+    "@expressjs/perf-autocannon": "^1.0.0"
   },
   "devDependencies": {
+    "@expressjs/perf-metadata": "^1.0.0",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "rollup": "^4.46.2"
   }

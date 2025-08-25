@@ -47,6 +47,11 @@ const { values, positionals } = parseArgs({
 
     write: {
       type: 'boolean'
+    },
+
+    duration: {
+      type: 'string',
+      short: 'd'
     }
   }
 });

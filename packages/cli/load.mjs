@@ -10,11 +10,12 @@ export function help (opts = {}) {
   Flags:
 
     --cwd=${opts.cwd || normalize(join(import.meta.dirname, '..', '..'))}
-    --runner=@expressjs/perf-runner-docker
+    --runner=@expressjs/perf-runner-vanilla
     --repo=https://github.com/expressjs/perf-wg.git
     --repo-ref=master
     --test=@expressjs/perf-load-example
     --node=lts_latest
+    --duration=60
     --overrides='{"express":"latest"}'
     --config=./expf.config.json
     --[no-]write
@@ -53,12 +54,22 @@ export default function main (_opts = {}) {
       cwd,
       repo: 'https://github.com/expressjs/perf-wg.git',
       repoRef: 'master',
-      runner: '@expressjs/perf-runner-docker',
+      runner: '@expressjs/perf-runner-vanilla',
       test: '@expressjs/perf-load-example',
       node: 'lts_latest',
       ...conf,
+      duration: 60,
       ..._opts
     };
+
+    // Parse duration as integer if provided as string
+    if (typeof opts.duration === 'string') {
+      const parsedDuration = parseInt(opts.duration, 10);
+      if (isNaN(parsedDuration) || parsedDuration <= 0) {
+        throw new Error(`Invalid duration: ${opts.duration}. Duration must be a positive integer (seconds).`);
+      }
+      opts.duration = parsedDuration;
+    }
 
     let completed = false;
 
@@ -104,6 +115,7 @@ export default function main (_opts = {}) {
         test: opts.test,
         node: vers?.[0]?.version,
         overrides: opts.overrides,
+        duration: opts.duration,
         signal: ac.signal
       });
 

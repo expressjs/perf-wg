@@ -1,8 +1,9 @@
 # Node Settings
 ARG NODE_VERSION="lts"
-ARG NODE_BASE="bookworm"
+ARG OS="bookworm"
+ARG RUNNER_TYPE="vanilla"
 
-FROM node:${NODE_VERSION}-${NODE_BASE}
+FROM node:${NODE_VERSION}-${OS}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -26,7 +27,13 @@ RUN git clone https://github.com/brendangregg/FlameGraph.git
 VOLUME ["/home/node/repo"]
 VOLUME ["/home/node/results"]
 EXPOSE 3000 9229
-COPY metadata-bundle.mjs metadata.mjs
-COPY overrides.mjs overrides.mjs
-COPY scripts/start.sh start.sh
+
+# Copy utilities directly from runner-base
+COPY runner-base/metadata-bundle.mjs metadata.mjs
+COPY runner-base/overrides.mjs overrides.mjs
+COPY runner-base/scripts/start.sh start.sh
+
+# Set runtime type for this container
+ENV RUNTIME_TYPE=vanilla
+
 ENTRYPOINT ["./start.sh"]

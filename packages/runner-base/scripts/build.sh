@@ -9,7 +9,13 @@ if [ -z "$2" ]; then
   echo "Node base os is required. (\$2)"
   exit 1;
 fi;
+if [ -z "$3" ]; then
+  echo "Runner type is required. (\$3)"
+  exit 1;
+fi;
 
+# Build metadata bundle (from runner-base directory)
+cd "$(dirname "$0")/.."
 rollup metadata.mjs --file metadata-bundle.mjs --plugin @rollup/plugin-node-resolve
 
 # Start docker daemon if not running
@@ -26,7 +32,15 @@ fi
 
 NODE_VERSION=$1
 NODE_BASE=$2
-TAG="expf-runner:${NODE_VERSION}-${NODE_BASE}"
+RUNNER_TYPE=$3
+TAG="expf-runner-${RUNNER_TYPE}:${NODE_VERSION}-${NODE_BASE}"
+
+# Check if runner directory exists (relative to packages dir)
+RUNNER_DIR="../runner-${RUNNER_TYPE}"
+if [ ! -d "$RUNNER_DIR" ]; then
+  echo "Runner directory not found: $RUNNER_DIR"
+  exit 1
+fi
 
 FORCE=
 while test $# -gt 0; do
@@ -41,8 +55,15 @@ while test $# -gt 0; do
 done
 
 if [ -n "$FORCE" ] || [ -z "$(docker images -q $TAG 2> /dev/null)" ]; then
-  docker build . --build-arg NODE_VERSION=${NODE_VERSION} --build-arg NODE_BASE=${NODE_BASE} --tag "$TAG"
-  docker tag $TAG "expf-runner:latest"
+  echo "Building container: $TAG"
+  # Use packages directory as build context, specify dockerfile relative to build context
+  cd ..
+  docker build -f "runner-${RUNNER_TYPE}/Dockerfile" . \
+    --build-arg NODE_VERSION=${NODE_VERSION} \
+    --build-arg OS=${NODE_BASE} \
+    --build-arg RUNNER_TYPE=${RUNNER_TYPE} \
+    --tag "$TAG"
+  docker tag $TAG "expf-runner-${RUNNER_TYPE}:latest"
 else
   echo "Using existing container: $TAG"
 fi

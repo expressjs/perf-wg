@@ -64,6 +64,7 @@ Two teams exist for mentioning the group and managing access:
 - [Andre Ferreira](https://github.com/andrehrferreira)
 - [Luke Lucas](https://github.com/O4FDev)
 - [Jefferson Rios](https://github.com/riosje)
+- [Rafael Gonzaga](https://github.com/RafaelGSS)
 
 ## Meetings
 

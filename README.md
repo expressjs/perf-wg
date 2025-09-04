@@ -63,6 +63,7 @@ Two teams exist for mentioning the group and managing access:
 - [Murat Kirazkaya](https://github.com/GroophyLifefor)
 - [Andre Ferreira](https://github.com/andrehrferreira)
 - [Luke Lucas](https://github.com/O4FDev)
+- [Jefferson Rios](https://github.com/riosje)
 
 ## Meetings
 

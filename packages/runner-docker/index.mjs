@@ -3,14 +3,9 @@ import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import ac from '@expressjs/perf-autocannon';
 import { collectMetadata } from '@expressjs/perf-metadata';
-import nv from '@pkgjs/nv';
 
 export function buildContainer (opts = {}) {
   return new Promise(async (resolve, reject) => {
-    const vers = await nv(opts.node, {
-      latestOfMajorOnly: true
-    });
-    const nodeVer = vers?.[0]?.version || 'lts';
     // TODO: bookworm hardcoded until we figure out
     // https://github.com/nodejs/docker-node/issues/2101#issuecomment-3024653783
     const os = 'bookworm';
@@ -19,15 +14,15 @@ export function buildContainer (opts = {}) {
     const cp = execFile(
       join(import.meta.dirname, 'scripts', 'build.sh'),
       [
-        nodeVer,
+        opts.node || 'lts',
         os
       ],
       { cwd: import.meta.dirname }
     );
     cp.on('exit', () => {
       resolve({
-        tag: `expf-runner:${nodeVer}-${os}`,
-        node: nodeVer
+        tag: `expf-runner:${opts.node}-${os}`,
+        node: opts.node
       });
     });
     cp.on('error', reject);

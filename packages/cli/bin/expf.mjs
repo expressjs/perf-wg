@@ -4,6 +4,7 @@ import { argv } from 'node:process';
 const { values, positionals } = parseArgs({
   args: argv,
   allowPositionals: true,
+  allowNegative: true,
   options: {
     help: {
       type: 'boolean'
@@ -37,6 +38,15 @@ const { values, positionals } = parseArgs({
     overrides: {
       type: 'string',
       short: 'o'
+    },
+
+    config: {
+      type: 'string',
+      short: 'c'
+    },
+
+    write: {
+      type: 'boolean'
     }
   }
 });

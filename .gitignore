@@ -1,3 +1,4 @@
 node_modules
 results
 perf/load/*/package-lock.json
+.DS_Store

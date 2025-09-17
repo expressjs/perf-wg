@@ -16,6 +16,8 @@ export function help (opts = {}) {
     --test=@expressjs/perf-load-example
     --node=lts_latest
     --overrides='{"express":"latest"}'
+    --config=./expf.config.json
+    --[no-]write
 `
 }
 
@@ -25,13 +27,36 @@ export default function main (_opts = {}) {
     return;
   }
   return new Promise(async (resolve, reject) => {
+    const cwd = normalize(join(import.meta.dirname, '..', '..'));
+
+    let conf = {};
+    try {
+      conf = (await import(join(cwd, _opts.config || 'expf.config.json'), {
+        with: {
+          type: 'json'
+        }
+      })).default;
+    } catch (err) {
+      // Only throw if config was explicitly passed, not if we failed to load the default file
+      if (_opts.config) {
+        throw new Error('Failed to load config file', {
+          cause: err
+        });
+      }
+      // Warn when a config file was found but was not loadable
+      if (err.code !== 'ERR_MODULE_NOT_FOUND') {
+        process.emitWarning(err);
+      }
+    }
+
     const opts = {
-      cwd: normalize(join(import.meta.dirname, '..', '..')),
+      cwd,
       repo: 'https://github.com/expressjs/perf-wg.git',
       repoRef: 'master',
       runner: '@expressjs/perf-runner-docker',
       test: '@expressjs/perf-load-example',
       node: 'lts_latest',
+      ...conf,
       ..._opts
     };
 
@@ -82,10 +107,14 @@ export default function main (_opts = {}) {
         signal: ac.signal
       });
 
-      const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
-      await mkdir(dirname(outputFile), { recursive: true });
-      await writeFile(outputFile, JSON.stringify(results, null, 2));
-      console.log(`written to: ${outputFile}`);
+      if (opts.write !== false) {
+        const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
+        await mkdir(dirname(outputFile), { recursive: true });
+        await writeFile(outputFile, JSON.stringify(results, null, 2));
+        console.log(`written to: ${outputFile}`);
+      } else {
+        console.log(results);
+      }
     } catch (e) {
       console.error(e);
     }

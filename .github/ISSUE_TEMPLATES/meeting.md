@@ -40,9 +40,25 @@ Or in your local time:
 
 Extracted from **<%= agendaLabel %>** labelled issues and pull requests from **<%= owner %>/<%= repo %>** prior to the meeting.
 
-<%= agendaIssues.map((i) => {
-  return `* ${i.html_url}`
-}).join('\n') %>
+<%= agendaIssues
+    .filter((i) => {
+      return !i.labels.find((l) => l.name === 'review requested')
+    })
+    .map((i) => {
+      return `* ${i.html_url}`
+    }).join('\n')
+%>
+
+**Pull Request Reviews:**
+
+<%= agendaIssues
+    .filter((i) => {
+      return i.labels.find((l) => l.name === 'review requested')
+    })
+    .map((i) => {
+      return `* ${i.html_url}`
+    }).join('\n')
+%>
 
 ## Invited
 

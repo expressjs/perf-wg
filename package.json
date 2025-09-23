@@ -4,6 +4,8 @@
   "description": "ExpressJS Performance Working Group",
   "scripts": {
     "setup": "npm i",
+    "local-server": "expf local-server",
+    "local-load": "expf local-load",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run --workspaces --if-present lint",
     "lint:fix": "npm run --workspaces --if-present lint:fix",

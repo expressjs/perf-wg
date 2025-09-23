@@ -88,6 +88,20 @@ switch (positionals[2]) {
       console.error(e);
     }
     break;
+  case 'local-server':
+    try {
+      await (await import('../local-server.mjs')).default(values);
+    } catch (e) {
+      console.error(e);
+    }
+    break;
+  case 'local-load':
+    try {
+      await (await import('../local-load.mjs')).default(values);
+    } catch (e) {
+      console.error(e);
+    }
+    break;
   default:
     console.log(`
 Express Performance Testing CLI

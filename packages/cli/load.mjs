@@ -2,6 +2,7 @@ import { normalize, join, dirname } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
 import nv from '@pkgjs/nv';
 
+// TODO: Add description to each flag
 export function help (opts = {}) {
   return `$ expf load [flags]
 

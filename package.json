@@ -5,6 +5,7 @@
   "scripts": {
     "setup": "npm i",
     "local-server": "expf local-server",
+    "local-load": "expf local-load",
     "test": "echo \"Error: no test specified\" && exit 1",
     "load": "expf load",
     "test:load": "expf load --test=@expressjs/perf-load-example",

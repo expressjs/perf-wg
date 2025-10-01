@@ -18,7 +18,7 @@ node metadata.mjs > $RESULTS_DIR/metadata.json
 # If not, require a repo and ref
 REPO_DIR="./repo"
 if [ -d "$REPO_DIR" ]; then
-  echo "Using local benchmarks"
+  echo "Using local repo."
   cd "$REPO_DIR"
 else
   if [ -z "$REPO" ]; then

@@ -2,6 +2,7 @@
   "name": "@expressjs/perf-requests",
   "version": "1.0.0",
   "exports": {
+    ".": "./index.mjs",
     "./get-basic-paths": "./get-basic-paths.mjs",
     "./get-slash": "./get-slash.mjs",
     "./get-query": "./get-query.mjs",

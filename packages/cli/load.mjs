@@ -11,7 +11,7 @@ export function help (opts = {}) {
   Flags:
 
     --cwd=${opts.cwd || normalize(join(import.meta.dirname, '..', '..'))}
-    --runner=@expressjs/perf-runner-vanilla
+    --runner=@expressjs/perf-runner-local
     --repo=https://github.com/expressjs/perf-wg.git
     --repo-ref=master
     --test=@expressjs/perf-load-example
@@ -20,6 +20,7 @@ export function help (opts = {}) {
     --overrides='{"express":"latest"}'
     --config=./expf.config.json
     --[no-]write
+    --[no-]parallel
 
   Runners:
     - @expressjs/perf-runner-vanilla: local docker based runner
@@ -59,9 +60,9 @@ export default function main (_opts = {}) {
 
     const opts = {
       cwd,
-      repo: 'https://github.com/expressjs/perf-wg.git',
-      repoRef: 'master',
-      runner: '@expressjs/perf-runner-vanilla',
+      repo: null, // 'https://github.com/expressjs/perf-wg.git',
+      repoRef: null, // 'master',
+      runner: '@expressjs/perf-runner-local',
       test: '@expressjs/perf-load-example',
       node: 'lts_latest',
       ...conf,
@@ -116,6 +117,12 @@ export default function main (_opts = {}) {
       vers = await nv(opts.node, {
         latestOfMajorOnly: true
       });
+
+      if (!vers?.[0]?.version) {
+        throw Object.assign(new Error(`Unable to resolve node version`), {
+          spec: opts.node
+        });
+      }
     } catch (e) {
       // If offline or cannt load node versions, use
       // the option as passed in without a default
@@ -138,7 +145,9 @@ export default function main (_opts = {}) {
       await writeFile(outputFile, JSON.stringify(results, null, 2));
       console.log(`written to: ${outputFile}`);
     } else {
-      console.log(results);
+      console.log(...Object.entries(results).flatMap(([k, v]) => {
+        return ['\n', k, '\n', v];
+      }));
     }
     completed = true;
 

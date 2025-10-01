@@ -1,5 +1,7 @@
 import autocannon from 'autocannon';
 
+export * from './spawn.mjs';
+
 export function run (opts) {
   return new Promise((resolve, reject) => {
     autocannon(opts, (err, result) => {

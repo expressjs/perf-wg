@@ -49,6 +49,11 @@ const { values, positionals } = parseArgs({
       type: 'boolean'
     },
 
+    parallel: {
+      type: 'boolean',
+      default: false
+    },
+
     duration: {
       type: 'string',
       short: 'd'
@@ -84,20 +89,6 @@ switch (positionals[2]) {
   case 'bench':
     try {
       await (await import('../bench.mjs')).default(values);
-    } catch (e) {
-      console.error(e);
-    }
-    break;
-  case 'local-server':
-    try {
-      await (await import('../local-server.mjs')).default(values);
-    } catch (e) {
-      console.error(e);
-    }
-    break;
-  case 'local-load':
-    try {
-      await (await import('../local-load.mjs')).default(values);
     } catch (e) {
       console.error(e);
     }

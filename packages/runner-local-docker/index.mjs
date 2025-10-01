@@ -142,20 +142,20 @@ export function createRunner (runnerConfig = {}) {
     const opts = { ..._opts };
     if (opts?.signal.aborted) return;
 
-    const cannon = ac({
-      url: server.metadata.url.toString(),
+    const load = startLoad({
+      url: server.metadata.url,
       requests: await (await import(opts.test)).requests(),
       duration: opts.duration
     });
 
     opts?.signal.addEventListener('abort', () => {
-      cannon.stop?.();
+      load.close();
     });
 
     return {
       metadata: collectMetadata(),
-      close: async () => cannon.stop?.(),
-      results: () => cannon
+      close: () => load.close(),
+      results: () => load.results()
     };
   }
 

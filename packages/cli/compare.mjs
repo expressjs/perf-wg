@@ -25,11 +25,14 @@ export default function main (_opts = {}, resultA, resultB) {
     console.log(help());
     return;
   }
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const opts = {
       cwd: normalize(join(import.meta.dirname, '..', '..')),
       ..._opts
     };
+    // TODO: these are considered syntax errors according to semistandard, despite clearly not being so
+    // likely an old version of eslint parsing under the hood. Just leaving for now.
     const a = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
     const b = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
     const comp = compare(a, b);

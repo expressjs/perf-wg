@@ -16,7 +16,7 @@ export default function main (_opts = {}) {
     console.log(help());
     return;
   }
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     throw new Error('not yet implemented');
   });
-};
+}

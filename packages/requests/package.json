@@ -7,10 +7,15 @@
     "./get-query": "./get-query.mjs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard",
+    "lint:fix": "semistandard --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "semistandard": "^17.0.0"
+  }
 }

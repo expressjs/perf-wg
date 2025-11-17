@@ -30,4 +30,3 @@ export default async function main (_opts = {}) {
 
   return run(opts);
 }
-

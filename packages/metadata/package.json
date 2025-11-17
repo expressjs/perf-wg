@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "main": "index.mjs",
   "scripts": {
-    "test": "semistandard"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard",
+    "lint:fix": "semistandard --fix"
   },
   "keywords": [],
   "author": "",

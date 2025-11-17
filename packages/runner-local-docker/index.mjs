@@ -3,53 +3,35 @@ import { join } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import ac from '@expressjs/perf-autocannon';
 import { collectMetadata } from '@expressjs/perf-metadata';
-import nv from '@pkgjs/nv';
 
-export function createRunner(runnerConfig = {}) {
+export function createRunner (runnerConfig = {}) {
   const {
-    type = undefined,
+    name = undefined,
     runtime = 'node.js',
     apm = 'none',
     capabilities = [],
-    env = {},
-    dockerFile = 'Dockerfile',
-    nodeVersion,  // Allow runner-specific node version
-    os      // Allow runner-specific base OS
+    env = {}
   } = runnerConfig;
 
-  async function buildContainer(opts = {}) {
-    return new Promise(async (resolve, reject) => {
-      // Use runner-specific version if provided, otherwise use CLI option
-      let nodeVer, osVer;
-      
-      if (nodeVersion && os) {
-        // Use runner-specific configuration
-        nodeVer = nodeVersion;
-        osVer = os;
-      } else {
-        // Fall back to CLI configuration
-        const vers = await nv(opts.node, {
-          latestOfMajorOnly: true
-        });
-        nodeVer = vers?.[0]?.version || 'lts';
-        osVer = 'bookworm';
-      }
+  async function buildContainer (opts = {}) {
+    const { node, os = 'bookworm' } = opts;
 
+    return new Promise((resolve, reject) => {
       const cp = execFile(
         join(import.meta.dirname, 'scripts', 'build.sh'),
         [
-          nodeVer,
-          osVer,
-          type // Pass runner type to build script
+          node,
+          os,
+          name
         ],
         { cwd: import.meta.dirname }
       );
-      
+
       cp.on('exit', () => {
         resolve({
-          tag: `expf-runner-${type}:${nodeVer}-${osVer}`,
-          node: nodeVer,
-          type,
+          tag: `expf-runner-${name}:${node}-${os}`,
+          node: node,
+          name,
           runtime,
           apm
         });
@@ -60,7 +42,7 @@ export function createRunner(runnerConfig = {}) {
     });
   }
 
-  function startServer(opts = {}) {
+  function startServer (opts = {}) {
     return new Promise((resolve, reject) => {
       if (opts?.signal.aborted) {
         return reject(opts.signal.reason);
@@ -71,7 +53,7 @@ export function createRunner(runnerConfig = {}) {
         opts.repo,
         opts.repoRef,
         opts.test,
-        opts.tag,
+        opts.tag
       ];
 
       if (opts.overrides) {
@@ -81,14 +63,14 @@ export function createRunner(runnerConfig = {}) {
       }
 
       // Pass runtime environment variables as arguments to run.sh
-      const envVars = { ...env, RUNTIME_TYPE: type };
+      const envVars = { ...env, RUNTIME_TYPE: name };
       args.push(envVars.NSOLID_SAAS || '');
       args.push(envVars.NEW_RELIC_LICENSE_KEY || '');
       args.push(envVars.DD_API_KEY || '');
 
       const cp = execFile(
-        join(import.meta.dirname, 'scripts', 'run.sh'), 
-        args, 
+        join(import.meta.dirname, 'scripts', 'run.sh'),
+        args,
         { env: { ...process.env, ...envVars } }
       );
 
@@ -97,13 +79,14 @@ export function createRunner(runnerConfig = {}) {
           url: new URL('http://localhost:3000'),
           dockerTag: opts.tag,
           nodeVersion: opts.node,
-          runnerType: type,
+          runnerType: name,
           runtime,
           apm,
           capabilities
         },
         status: 'starting',
         close: () => {
+          // eslint-disable-next-line promise/param-names
           return new Promise((closeResolve) => {
             cp.on('exit', () => {
               server.status = 'stopped';
@@ -127,7 +110,7 @@ export function createRunner(runnerConfig = {}) {
           } else {
             Object.assign(server.metadata, { error: results[3].error });
           }
-          
+
           return {
             output: results[0].value || results[0].error,
             flamegraph: results[1].value || results[1].error,
@@ -142,11 +125,11 @@ export function createRunner(runnerConfig = {}) {
         cp.kill('SIGINT');
         reject(new Error('aborted'));
       });
-      
+
       cp.on('error', reject);
       cp.stdout.on('data', (d) => {
         process.stdout.write(d);
-        if (server.status === 'starting' && d.toString('utf8').includes("Running")) {
+        if (server.status === 'starting' && d.toString('utf8').includes('Running')) {
           server.status = 'started';
           resolve(server);
         }
@@ -155,7 +138,7 @@ export function createRunner(runnerConfig = {}) {
     });
   }
 
-  async function startClient(_opts = {}, server) {
+  async function startClient (_opts = {}, server) {
     const opts = { ..._opts };
     if (opts?.signal.aborted) return;
 
@@ -166,7 +149,6 @@ export function createRunner(runnerConfig = {}) {
     });
 
     opts?.signal.addEventListener('abort', () => {
-      console.log('should stop client')
       cannon.stop?.();
     });
 
@@ -177,15 +159,14 @@ export function createRunner(runnerConfig = {}) {
     };
   }
 
-  async function runner(_opts = {}) {
+  async function runner (_opts = {}) {
     const opts = { ..._opts };
 
     const containerMeta = await buildContainer(opts);
-    opts.node = containerMeta.node;
     opts.tag = containerMeta.tag;
 
     const server = await startServer(opts);
-    const client = await startClient(opts, server); 
+    const client = await startClient(opts, server);
 
     const clientResults = await client.results();
     const serverResults = await server.results();

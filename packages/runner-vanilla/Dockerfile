@@ -29,9 +29,9 @@ VOLUME ["/home/node/results"]
 EXPOSE 3000 9229
 
 # Copy utilities directly from runner-base
-COPY runner-base/metadata-bundle.mjs metadata.mjs
-COPY runner-base/overrides.mjs overrides.mjs
-COPY runner-base/scripts/start.sh start.sh
+COPY runner-local-docker/metadata-bundle.mjs metadata.mjs
+COPY runner-local-docker/overrides.mjs overrides.mjs
+COPY runner-local-docker/scripts/start.sh start.sh
 
 # Set runtime type for this container
 ENV RUNTIME_TYPE=vanilla

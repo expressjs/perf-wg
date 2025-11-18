@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "bin/expf.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "semistandard",
+    "lint:fix": "semistandard --fix"
   },
   "bin": {
     "expf": "./bin/expf.sh"
@@ -16,5 +18,8 @@
     "@pkgjs/nv": "^0.2.2",
     "autocannon": "^8.0.0",
     "autocannon-compare": "^0.4.0"
+  },
+  "devDependencies": {
+    "semistandard": "^17.0.0"
   }
 }

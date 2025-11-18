@@ -5,17 +5,27 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "node --run build",
+    "lint": "semistandard",
+    "lint:fix": "semistandard --fix",
     "build": "node --run shared:build",
     "run": "node --run shared:run",
     "shared:build": "../runner-base/scripts/build.sh 22.18.0 bookworm vanilla",
     "shared:run": "../runner-base/scripts/run.sh"
   },
-  "keywords": ["express", "performance", "benchmark", "vanilla", "node"],
+  "keywords": [
+    "express",
+    "performance",
+    "benchmark",
+    "vanilla",
+    "node"
+  ],
   "author": "",
   "license": "ISC",
   "description": "Vanilla Node.js runner for Express performance benchmarks",
   "dependencies": {
-    "@expressjs/perf-runner-base": "^1.0.0"
+    "@expressjs/perf-runner-local-docker": "^1.0.0"
+  },
+  "devDependencies": {
+    "semistandard": "^17.0.0"
   }
 }

@@ -2,6 +2,7 @@ import { normalize, join, dirname } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
 import nv from '@pkgjs/nv';
 
+// TODO: Add description to each flag
 export function help (opts = {}) {
   return `$ expf load [flags]
 
@@ -10,7 +11,7 @@ export function help (opts = {}) {
   Flags:
 
     --cwd=${opts.cwd || normalize(join(import.meta.dirname, '..', '..'))}
-    --runner=@expressjs/perf-runner-vanilla
+    --runner=@expressjs/perf-runner-local
     --repo=https://github.com/expressjs/perf-wg.git
     --repo-ref=master
     --test=@expressjs/perf-load-example
@@ -52,9 +53,9 @@ export default function main (_opts = {}) {
 
     const opts = {
       cwd,
-      repo: 'https://github.com/expressjs/perf-wg.git',
-      repoRef: 'master',
-      runner: '@expressjs/perf-runner-vanilla',
+      repo: null, // 'https://github.com/expressjs/perf-wg.git',
+      repoRef: null, // 'master',
+      runner: '@expressjs/perf-runner-local',
       test: '@expressjs/perf-load-example',
       node: 'lts_latest',
       ...conf,
@@ -108,6 +109,11 @@ export default function main (_opts = {}) {
       const vers = await nv(opts.node, {
         latestOfMajorOnly: true
       });
+      if (!vers?.[0]?.version) {
+        throw Object.assign(new Error(`Unable to resolve node version`), {
+          spec: opts.node
+        });
+      }
 
       const results = await runner({
         cwd: opts.cwd,

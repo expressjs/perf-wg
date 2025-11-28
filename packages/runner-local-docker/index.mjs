@@ -17,20 +17,24 @@ export function createRunner (runnerConfig = {}) {
     const { node, os = 'bookworm' } = opts;
 
     return new Promise((resolve, reject) => {
+      const args = [
+        node,
+        os,
+        name
+      ];
+      if (opts.forceRebuild) {
+        args.push('--force');
+      }
       const cp = execFile(
         join(import.meta.dirname, 'scripts', 'build.sh'),
-        [
-          node,
-          os,
-          name
-        ],
+        args,
         { cwd: import.meta.dirname }
       );
 
       cp.on('exit', () => {
         resolve({
           tag: `expf-runner-${name}:${node}-${os}`,
-          node: node,
+          node,
           name,
           runtime,
           apm

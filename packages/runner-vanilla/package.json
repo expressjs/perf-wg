@@ -9,8 +9,8 @@
     "lint:fix": "semistandard --fix",
     "build": "node --run shared:build",
     "run": "node --run shared:run",
-    "shared:build": "../runner-base/scripts/build.sh 22.18.0 bookworm vanilla",
-    "shared:run": "../runner-base/scripts/run.sh"
+    "shared:build": "../runner-local-docker/scripts/build.sh 24 bookworm vanilla --force",
+    "shared:run": "../runner-local-docker/scripts/run.sh"
   },
   "keywords": [
     "express",

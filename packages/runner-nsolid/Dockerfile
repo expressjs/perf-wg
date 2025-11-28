@@ -20,6 +20,11 @@ RUN if [ ! -f /usr/bin/perf ] && [ -f /usr/bin/perf_5.10 ]; then \
       ln -s /usr/bin/perf_5.10 /usr/bin/perf; \
     fi
 
+USER node
+WORKDIR /home/node
+
+COPY .npmrc /home/node/.npmrc
+
 # Setup @mmarchini/observe
 RUN <<-EOF
   npm install -g @mmarchini/observe@^3.0.0
@@ -27,23 +32,19 @@ RUN <<-EOF
   chown -R node:node /usr/local/bin/observe
 EOF
 
-USER node
-WORKDIR /home/node
-
 # Setup FlameGraph tools
 RUN git clone https://github.com/brendangregg/FlameGraph.git
 
 VOLUME ["/home/node/repo"]
 VOLUME ["/home/node/results"]
-EXPOSE 3000 9229
+EXPOSE 3000 9229 1337
 
 # Copy utilities directly from runner-base
-COPY runner-local-docker/metadata-bundle.mjs metadata.mjs
-COPY runner-local-docker/overrides.mjs overrides.mjs
-COPY runner-local-docker/scripts/start.sh start.sh
+COPY packages/runner-local-docker/metadata-bundle.mjs metadata.mjs
+COPY packages/runner-local-docker/overrides.mjs overrides.mjs
+COPY packages/runner-local-docker/scripts/start.sh start.sh
 
 # Set runtime type for this container
 ENV RUNTIME_TYPE=nsolid
-
 
 ENTRYPOINT ["./start.sh"]

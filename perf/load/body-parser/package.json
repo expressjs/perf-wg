@@ -1,0 +1,16 @@
+{
+  "name": "@expressjs/perf-load-body-parser",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "setup": "npm i --no-workspaces --install-links"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@expressjs/perf-requests": "file:../../../packages/requests",
+    "@expressjs/perf-servers-express-helloworld": "file:../../../servers/express-helloworld"
+  }
+}

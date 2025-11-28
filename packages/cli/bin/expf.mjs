@@ -52,9 +52,19 @@ const { values, positionals } = parseArgs({
     duration: {
       type: 'string',
       short: 'd'
+    },
+
+    'force-rebuild': {
+      type: 'boolean'
     }
   }
 });
+
+// Convert cli friendly values to JS friendly values
+values.repoRef = values['repo-ref'];
+delete values['repo-ref'];
+values.forceRebuild = values['force-rebuild'];
+delete values['force-rebuild'];
 
 switch (positionals[2]) {
   case 'compare':

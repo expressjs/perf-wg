@@ -19,6 +19,12 @@ export function help (opts = {}) {
     --overrides='{"express":"latest"}'
     --config=./expf.config.json
     --[no-]write
+
+  Runners:
+    - @expressjs/perf-runner-vanilla: local docker based runner
+      - Flags: --force-rebuild
+    - @expressjs/perf-runner-nsolid: local docker based runner with nsolid
+      - Flags: --force-rebuild
 `
 }
 
@@ -104,31 +110,34 @@ export default function main (_opts = {}) {
     // Import and start the runner
     const runner = (await import(opts.runner)).default;
 
+    let vers;
     try {
-      const vers = await nv(opts.node, {
+      vers = await nv(opts.node, {
         latestOfMajorOnly: true
       });
-
-      const results = await runner({
-        cwd: opts.cwd,
-        repo: opts.repo,
-        test: opts.test,
-        node: vers?.[0]?.version,
-        overrides: opts.overrides,
-        duration: opts.duration,
-        signal: ac.signal
-      });
-
-      if (opts.write !== false) {
-        const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
-        await mkdir(dirname(outputFile), { recursive: true });
-        await writeFile(outputFile, JSON.stringify(results, null, 2));
-        console.log(`written to: ${outputFile}`);
-      } else {
-        console.log(results);
-      }
     } catch (e) {
-      console.error(e);
+      // If offline or cannt load node versions, use
+      // the option as passed in without a default
+      if (e.code === 'ENOTFOUND' && _opts.node) {
+        vers = [{ version: _opts.node}];
+      } else {
+        throw e;
+      }
+    }
+
+    const results = await runner({
+      ...opts,
+      node: vers?.[0]?.version,
+      signal: ac.signal
+    });
+
+    if (opts.write !== false) {
+      const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
+      await mkdir(dirname(outputFile), { recursive: true });
+      await writeFile(outputFile, JSON.stringify(results, null, 2));
+      console.log(`written to: ${outputFile}`);
+    } else {
+      console.log(results);
     }
     completed = true;
 

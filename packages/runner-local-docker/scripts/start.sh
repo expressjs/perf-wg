@@ -7,10 +7,12 @@ if [ -z "$TEST" ]; then
   exit 1;
 fi;
 
+RESULTS_DIR="$(pwd)/results"
+
 #
 # Write out metadata file
 #
-node metadata.mjs > ./results/metadata.json
+node metadata.mjs > $RESULTS_DIR/metadata.json
 
 # We can mount the path for local dev,
 # If not, require a repo and ref
@@ -138,18 +140,18 @@ $RUNTIME_CMD $NODE_OPTIONS \
   --perf-basic-prof-only-functions \
   --inspect=0.0.0.0:9229 \
   "$MAIN" \
-  &> ./results/output.txt &
+  &> $RESULTS_DIR/output.txt &
 SERVER_PID=$!
 
 # Start perf
-perf record -F 99 -g -o ./results/perf.data -p $SERVER_PID &> ./results/perf.txt &
+perf record -F 99 -g -o $RESULTS_DIR/perf.data -p $SERVER_PID &> $RESULTS_DIR/perf.txt &
 PERF_PID=$!
 
 on_sigint()
 {
   echo
   echo "Capture ending heap snapshot"
-  npx -q @mmarchini/observe heap-snapshot -p ${SERVER_PID} --file ./results/end.heapsnapshot
+  npx -q @mmarchini/observe heap-snapshot -p ${SERVER_PID} --file $RESULTS_DIR/end.heapsnapshot
 
   echo "Closing server"
   kill -2 "$SERVER_PID" || true
@@ -157,7 +159,7 @@ on_sigint()
   local EX=$?
 
   echo "Generating flamegraph"
-  perf script -i ./results/perf.data | ./FlameGraph/stackcollapse-perf.pl | ./FlameGraph/flamegraph.pl --colors=js > ./results/profile.svg
+  perf script -i $RESULTS_DIR/perf.data | /home/node/FlameGraph/stackcollapse-perf.pl | /home/node/FlameGraph/flamegraph.pl --colors=js > $RESULTS_DIR/profile.svg
 
   EXIT_CODE=${EX:-0}
 }
@@ -172,7 +174,7 @@ cleanup() {
   
   if [ -f "package-lock.json" ]; then
     echo "moving package-lock.json to results"
-    mv package-lock.json ./results/package-lock.json
+    mv package-lock.json $RESULTS_DIR/package-lock.json
   fi
 }
 
@@ -185,13 +187,13 @@ while true; do
   if ! [ -d "/proc/${SERVER_PID}" ]; then
     echo "Exited prematurely (pid ${SERVER_PID}, code ${EXIT_CODE-unknown})"
     wait $SERVER_PID || true
-    cat ./results/output.txt
+    cat $RESULTS_DIR/output.txt
     EXIT_CODE=1
     break
   fi
-  if grep -q "startup: " <(head ./results/output.txt); then
+  if grep -q "startup: " <(head $RESULTS_DIR/output.txt); then
     echo "Capture starting heap snapshot"
-    npx -q @mmarchini/observe heap-snapshot -p ${SERVER_PID} --file ./results/start.heapsnapshot
+    npx -q @mmarchini/observe heap-snapshot -p ${SERVER_PID} --file $RESULTS_DIR/start.heapsnapshot
     break
   fi
 done

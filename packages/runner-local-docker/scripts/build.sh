@@ -14,9 +14,21 @@ if [ -z "$3" ]; then
   exit 1;
 fi;
 
+# cd to the root of the repo
+SOURCE=${BASH_SOURCE[0]:-$0}
+while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+cd "${DIR}/../../.."
+
 # Build metadata bundle (from runner-base directory)
-cd "$(dirname "$0")/.."
+pushd ./packages/runner-local-docker
+pwd
 rollup metadata.mjs --file metadata-bundle.mjs --plugin @rollup/plugin-node-resolve
+popd
 
 # Start docker daemon if not running
 if (! docker stats --no-stream >/dev/null 2>&1 ); then
@@ -36,7 +48,7 @@ RUNNER_TYPE=$3
 TAG="expf-runner-${RUNNER_TYPE}:${NODE_VERSION}-${NODE_BASE}"
 
 # Check if runner directory exists (relative to packages dir)
-RUNNER_DIR="../runner-${RUNNER_TYPE}"
+RUNNER_DIR="packages/runner-${RUNNER_TYPE}"
 if [ ! -d "$RUNNER_DIR" ]; then
   echo "Runner directory not found: $RUNNER_DIR"
   exit 1
@@ -56,9 +68,7 @@ done
 
 if [ -n "$FORCE" ] || [ -z "$(docker images -q $TAG 2> /dev/null)" ]; then
   echo "Building container: $TAG"
-  # Use packages directory as build context, specify dockerfile relative to build context
-  cd ..
-  docker build -f "runner-${RUNNER_TYPE}/Dockerfile" . \
+  docker build -f "packages/runner-${RUNNER_TYPE}/Dockerfile" . \
     --build-arg NODE_VERSION=${NODE_VERSION} \
     --build-arg OS=${NODE_BASE} \
     --build-arg RUNNER_TYPE=${RUNNER_TYPE} \

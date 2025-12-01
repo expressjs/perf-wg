@@ -11,6 +11,11 @@ RUN apt-get update && \
       jq && \
     rm -rf /var/lib/apt/lists/*
 
+COPY .npmrc /root/.npmrc
+
+# Pointing at a local registry proxy
+RUN sed -i 's/127.0.0.1/host.docker.internal/' /root/.npmrc
+
 # Setup @mmarchini/observe
 RUN <<-EOF
   npm install -g @mmarchini/observe@^3.0.0
@@ -21,6 +26,8 @@ EOF
 USER node
 WORKDIR /home/node
 
+COPY .npmrc /home/node/.npmrc
+
 # Setup FlameGraph tools
 RUN git clone https://github.com/brendangregg/FlameGraph.git
 
@@ -29,9 +36,9 @@ VOLUME ["/home/node/results"]
 EXPOSE 3000 9229
 
 # Copy utilities directly from runner-base
-COPY runner-local-docker/metadata-bundle.mjs metadata.mjs
-COPY runner-local-docker/overrides.mjs overrides.mjs
-COPY runner-local-docker/scripts/start.sh start.sh
+COPY packages/runner-local-docker/metadata-bundle.mjs metadata.mjs
+COPY packages/runner-local-docker/overrides.mjs overrides.mjs
+COPY packages/runner-local-docker/scripts/start.sh start.sh
 
 # Set runtime type for this container
 ENV RUNTIME_TYPE=vanilla

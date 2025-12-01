@@ -4,7 +4,8 @@
   "exports": {
     "./get-basic-paths": "./get-basic-paths.mjs",
     "./get-slash": "./get-slash.mjs",
-    "./get-query": "./get-query.mjs"
+    "./get-query": "./get-query.mjs",
+    "./post-json": "./post-json.mjs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

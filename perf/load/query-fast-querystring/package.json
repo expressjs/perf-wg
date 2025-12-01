@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@expressjs/perf-requests": "file:../../../packages/requests",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "fast-querystring": "^1.1.2"
   }
 }

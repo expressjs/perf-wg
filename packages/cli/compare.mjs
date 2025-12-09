@@ -33,8 +33,21 @@ export default function main (_opts = {}, resultA, resultB) {
     };
     // TODO: these are considered syntax errors according to semistandard, despite clearly not being so
     // likely an old version of eslint parsing under the hood. Just leaving for now.
-    const a = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
-    const b = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
+    let a = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
+    let b = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
+
+    // Combine multiple results
+    if (Array.isArray(a)) {
+      console.warn('Aggregating results across multiple runs is not yet supported');
+      console.warn('comparing only the first result for sample A');
+      a = a[0];
+    }
+    if (Array.isArray(b)) {
+      console.warn('Aggregating results across multiple runs is not yet supported');
+      console.warn('comparing only the first result for sample B');
+      b = b[0];
+    }
+
     const comp = compare(a, b);
 
     console.log(header`A Results: ${resultA}`);

@@ -77,6 +77,7 @@ switch (positionals[2]) {
       await (await import('../compare.mjs')).default(values, ...positionals.slice(3));
     } catch (e) {
       console.error(e);
+      process.exit(1);
     }
     break;
   case 'load':
@@ -84,6 +85,7 @@ switch (positionals[2]) {
       await (await import('../load.mjs')).default(values);
     } catch (e) {
       console.error(e);
+      process.exit(1);
     }
     break;
   case 'bench':
@@ -91,6 +93,7 @@ switch (positionals[2]) {
       await (await import('../bench.mjs')).default(values);
     } catch (e) {
       console.error(e);
+      process.exit(1);
     }
     break;
   default:

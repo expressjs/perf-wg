@@ -4,7 +4,13 @@ import { quote as shellQuote } from 'shell-quote';
 
 export class Wrk2CLI {
   executable = 'wrk2';
+
+  // NOTE: keeping isPresent on the api because it seems useful
+  // if it turns out not to be, we can remove the property and just
+  // throw when not
   isPresent = null;
+  #isPresentProc;
+
   status = null;
   procs = [];
   results = [];
@@ -31,26 +37,8 @@ export class Wrk2CLI {
   }
 
   async start (opts = {}) {
-    // Check if present, but only once
-    if (this.isPresent === null) {
-      try {
-        await this.spawn(['-h']);
-        this.isPresent = true;
-      } catch (e) {
-        // Set the status to the error we got
-        this.status = e; 
-        this.isPresent = false;
-      }
-    }
-
-    if (!this.isPresent) {
-      this.status = this.status || 'not present';
-      throw Object.assign(new Error('executable not present', {
-        cause: this.status
-      }), {
-        code: 'EXECUTABLE_NOT_PRESENT',
-      });
-    }
+    // Check if the executable is present, throw if not
+    await this.checkIsPresent();
 
     this.status = 'starting';
 
@@ -78,7 +66,7 @@ export class Wrk2CLI {
     }
 
     // url (positional)
-    const url = opts.url ? new Url(opts.url, this.url) : this.url;
+    const url = opts.url || opts.path ? new Url(opts.url || opts.path, this.url) : this.url;
     args.push(url.toString());
 
     // Run the process
@@ -91,6 +79,33 @@ export class Wrk2CLI {
 
     this.results.push(result);
     return result;
+  }
+
+  async checkIsPresent () {
+    if (!this.#isPresentProc) {
+      try {
+        this.#isPresentProc = this.spawn(['-h']);
+        await this.#isPresentProc;
+        this.isPresent = true;
+      } catch (e) {
+        this.isPresent = false;
+        this.status = Object.assign(new Error('executable not present', {
+          cause: e
+        }), {
+          code: 'EXECUTABLE_NOT_PRESENT',
+        });
+        throw this.status;
+      }
+    } else {
+      try {
+        await this.#isPresentProc;
+      } catch (e) {
+        // Ignored this error because it should
+        // be handled by the first caller
+        throw this.status;
+      }
+
+    }
   }
 
   async spawn (args = [], opts = {}) {

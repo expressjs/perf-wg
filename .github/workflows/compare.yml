@@ -1,5 +1,26 @@
 name: Compare Load Tests
 on:
+  workflow_call:
+    inputs:
+      gitRef:
+        required: true
+        type: string
+        default: 'main'
+        description: 'The git ref to checkout'
+      path:
+        required: true
+        type: string
+      baselineId:
+        required: true
+        type: string
+      testId:
+        required: true
+        type: string
+    outputs:
+      summary:
+        description: "Run id for fetching artifacts"
+        value: ${{ jobs.load.outputs.summary }}
+
   workflow_dispatch:
     inputs:
       gitRef:
@@ -66,7 +87,9 @@ jobs:
            echo "path=$(ls "${{inputs.path}}/results" | grep "result-.*\.json" | grep -v "${{steps.baseline.outputs.path}}" | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: Compare
+        id: compare
         run: |
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           npm run compare -- "${{inputs.path}}/results/${{steps.baseline.outputs.path}}" "${{inputs.path}}/results/${{steps.test.outputs.path}}" >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "summary=\"$GITHUB_STEP_SUMMARY\" >> "$GITHUB_OUTPUT"

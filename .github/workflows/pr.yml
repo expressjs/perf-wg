@@ -1,0 +1,40 @@
+name: PR
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  baseline:
+    name: Run Baseline Load Tests
+    uses: ./.github/workflows/load.yml
+    with:
+      gitRef: ${{ github.event.pull_request.base.sha }}
+      node: 24.12.0
+      test: '@expressjs/perf-load-example'
+
+  test:
+    name: Run Test Load Tests
+    uses: ./.github/workflows/load.yml
+    with:
+      gitRef: ${{ github.event.pull_request.head.sha }}
+      node: 24.12.0
+      test: '@expressjs/perf-load-example'
+
+  compare:
+    name: Compare Load Tests
+    needs: [baseline, test]
+    uses: ./.github/workflows/compare.yml
+    with:
+      gitRef: ${{ github.event.pull_request.head.sha }}
+      path: ./perf/load/example
+      baselineId: ${{ needs.baseline.outputs.runId }}
+      testId: ${{ needs.test.outputs.runId }}
+    permissions:
+      actions: read
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [compare]
+    steps:
+      - run: echo ${{ needs.compare.outputs.summary }} >> "$GITHUB_STEP_SUMMARY"

@@ -1,5 +1,31 @@
 name: Load Test
 on:
+  workflow_call:
+    inputs:
+      gitRef:
+        required: true
+        type: string
+        default: 'main'
+        description: 'The git ref to checkout'
+      node:
+        required: true
+        type: string
+        default: '24'
+        description: 'Node version to use, accepts semver ranges and some aliases like latest_lts'
+      test:
+        required: true
+        type: string
+        default: '@expressjs/perf-load-example'
+      overrides:
+        type: string
+    outputs:
+      runId:
+        description: "Run id for fetching artifacts"
+        value: ${{github.run_id}}
+      artifactName:
+        description: "Artifact name for results"
+        value: perf-load-test-${{github.run_id}}
+
   workflow_dispatch:
     inputs:
       gitRef:
@@ -49,6 +75,7 @@ jobs:
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload results
+        id: upload-results
         uses: actions/upload-artifact@v4
         with:
           name: perf-load-test-${{github.run_id}}

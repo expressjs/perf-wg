@@ -1,0 +1,43 @@
+name: PR
+on:
+  pull_request:
+    branches: ci-workflow
+
+jobs:
+  baseline:
+    name: Run Baseline Load Tests
+    runs-on: ubuntu-latest
+    outputs:
+      runId: ${{ steps.load.outputs.runId }}
+    steps:
+      - uses: expressjs/perf-wg/.github/workflows/load.yml@ci-workflow-pr
+        id: load
+        with:
+          gitRef: ${{ github.event.pull_request.head.sha }}
+          node: 24.12.0
+
+  test:
+    name: Run Test Load Tests
+    runs-on: ubuntu-latest
+    outputs:
+      runId: ${{ steps.load.outputs.runId }}
+    steps:
+      - uses: expressjs/perf-wg/.github/workflows/load.yml@ci-workflow-pr
+        id: load
+        with:
+          gitRef: ${{ github.event.pull_request.base.sha }}
+          node: 24.12.0
+
+  compare:
+    name: Compare Load Tests
+    runs-on: ubuntu-latest
+    needs: [baseline, test]
+    steps:
+      - uses: expressjs/perf-wg/.github/workflows/compare.yml@ci-workflow-pr
+        id: compare
+        with:
+          gitRef: ${{ github.event.pull_request.head.sha }}
+          path: ./perf/load/example
+          baselineId: ${{ jobs.baseline.outputs.runId }}
+          testId: ${{ jobs.test.outputs.runId }}
+      - run: echo ${{ steps.compare.outputs.summary }} >> "$GITHUB_STEP_SUMMARY"

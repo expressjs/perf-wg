@@ -54,12 +54,6 @@ export function startLoad (opts = {}) {
 
   // Start here, await in .results()
   const toAwait = requests.flatMap((request) => {
-    // Don't allow specific requests to
-    // point at anything other than the path
-    if (request.path) {
-      request.url = request.path;
-    }
-
     return requesters.map((requester) => {
       return requester.start(request);
     });

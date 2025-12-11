@@ -7,7 +7,13 @@ export class AutocannonCLI {
   // was just carried over from the previous implementation, someone
   // should go and test I didn't break this
   executable = process.platform === 'win32' ? 'autocannon.cmd' : 'autocannon';
+
+  // NOTE: keeping isPresent on the api because it seems useful
+  // if it turns out not to be, we can remove the property and just
+  // throw when not
   isPresent = null;
+  #isPresentProc;
+
   status = null;
   procs = [];
   #results = [];
@@ -32,34 +38,8 @@ export class AutocannonCLI {
   }
 
   async start (opts = {}) {
-    // Check if present, but only once
-    if (this.isPresent === null) {
-      try {
-        this.isPresent = this.spawn(['-h']);
-        await this.isPresent;
-        this.isPresent = true;
-      } catch (e) {
-        // Set the status to the error we got
-        this.status = e;
-        this.isPresent = false;
-      }
-    } if (typeof this.isPresent?.then === 'function') {
-      try {
-        await this.isPresent;
-      } catch (e) {
-        // ignore this one because it should have been caught already
-        // in the start call that hit the first condition
-      }
-    }
-
-    if (!this.isPresent) {
-      this.status = this.status || 'not present';
-      throw Object.assign(new Error('executable not present', {
-        cause: this.status
-      }), {
-        code: 'EXECUTABLE_NOT_PRESENT',
-      });
-    }
+    // Check if the executable is present, throw if not
+    await this.checkIsPresent();
 
     this.status = 'starting';
 
@@ -104,7 +84,7 @@ export class AutocannonCLI {
     }
 
     // url (positional)
-    const url = opts.url ? new URL(opts.url, this.url) : this.url;
+    const url = opts.url || opts.path ? new URL(opts.url || opts.path, this.url) : this.url;
 
     // Run the process
     const stdout = await this.spawn(args, url);
@@ -120,6 +100,33 @@ export class AutocannonCLI {
 
     this.#results.push(result);
     return result;
+  }
+
+  async checkIsPresent () {
+    if (!this.#isPresentProc) {
+      try {
+        this.#isPresentProc = this.spawn(['-h']);
+        await this.#isPresentProc;
+        this.isPresent = true;
+      } catch (e) {
+        this.isPresent = false;
+        this.status = Object.assign(new Error('executable not present', {
+          cause: e
+        }), {
+          code: 'EXECUTABLE_NOT_PRESENT',
+        });
+        throw this.status;
+      }
+    } else {
+      try {
+        await this.#isPresentProc;
+      } catch (e) {
+        // Ignored this error because it should
+        // be handled by the first caller
+        throw this.status;
+      }
+
+    }
   }
 
   async spawn (args = [], url, opts = {}) {

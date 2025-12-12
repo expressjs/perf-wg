@@ -19,8 +19,8 @@
   "license": "ISC",
   "description": "Shared utilities and scripts for Express performance runners",
   "dependencies": {
-    "@expressjs/perf-autocannon": "^1.0.0",
     "@expressjs/perf-metadata": "^1.0.0",
+    "@expressjs/perf-requests": "^1.0.0",
     "@pkgjs/nv": "^0.2.2"
   },
   "devDependencies": {

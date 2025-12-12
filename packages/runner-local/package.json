@@ -1,0 +1,17 @@
+{
+  "name": "@expressjs/perf-runner-local",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@expressjs/perf-autocannon": "^1.0.0",
+    "@expressjs/perf-metadata": "^1.0.0",
+    "@expressjs/perf-wrk2": "^1.0.0"
+  }
+}

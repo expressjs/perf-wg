@@ -12,7 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "autocannon": "^8.0.0"
+    "autocannon": "^8.0.0",
+    "shell-quote": "^1.8.3"
   },
   "devDependencies": {
     "semistandard": "^17.0.0"

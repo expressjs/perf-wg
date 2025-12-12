@@ -49,6 +49,11 @@ const { values, positionals } = parseArgs({
       type: 'boolean'
     },
 
+    parallel: {
+      type: 'boolean',
+      default: false
+    },
+
     duration: {
       type: 'string',
       short: 'd'

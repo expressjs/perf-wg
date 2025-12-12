@@ -80,8 +80,12 @@ in the [OpenJS Foundation Slack](https://openjsf.org/collaboration) for realtime
 ## How to Run the Load Tests
 
 ### Requirements
-- Node.js v22 (Recommended)
-- Docker (for containerized runners)
+
+- Node.js v20 or newer
+- Docker for containerized runners
+- Load cli's on your `PATH`
+  - `autocannon` for local runner (optional, can be used via `PATH="$(pwd)/node_modules/.bin:${PATH}" npm run test:load`)
+  - `wrk2` for local runner (optional)
 
 ### Quick Start
 
@@ -103,19 +107,22 @@ The `load` command supports the following options:
 
 | Option | Short | Default | Description |
 |--------|-------|---------|-------------|
-| `--test` | `-t` | `@expressjs/perf-load-example` | Test module to run |
-| `--runner` | `-u` | `@expressjs/perf-runner-vanilla` | Runner module to use |
-| `--duration` | `-d` | `60` | Test duration in seconds |
-| `--node` | `-n` | `lts_latest` | Node.js version to use |
-| `--overrides` | `-o` | - | JSON string with package overrides |
 | `--cwd` | - | Current directory | Working directory |
+| `--runner` | `-u` | `@expressjs/perf-runner-local` | Runner module to use |
 | `--repo` | - | `https://github.com/expressjs/perf-wg.git` | Git repository URL |
 | `--repo-ref` | - | `master` | Git branch/tag to use |
+| `--test` | `-t` | `@expressjs/perf-load-example` | Test module to run |
+| `--node` | `-n` | `lts_latest` | Node.js version to use |
+| `--duration` | `-d` | `60` | Test duration in seconds |
+| `--overrides` | `-o` | - | JSON string with package overrides |
+| `--config` | `-c` | - | JSON string with package overrides |
+| `--[no-]write` | - | - | Write results file to disk |
+| `--force-rebuild` | - | - | For use with docker based runners, forces rebuilding container |
 
 #### Basic Commands
 
 ```bash
-# Run with default vanilla Node.js runner
+# Run with default local Node.js runner
 node --run load -- --test="@expressjs/perf-load-example"
 
 # Run with specific runner
@@ -146,6 +153,9 @@ node --run compare -- result-A.json result-B.json
 # Vanilla Node.js (baseline performance)
 node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/perf-runner-vanilla"
 
+# Vanilla Node.js with --force-rebuild
+node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/perf-runner-vanilla" --force-rebuild
+
 # N|Solid with built-in monitoring
 node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/perf-runner-nsolid"
 
@@ -155,6 +165,7 @@ node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/pe
 # Node.js with New Relic APM (when available)
 node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/perf-runner-newrelic"
 ```
+
 ### Programmatic Usage
 
 #### Basic Import and Usage
@@ -236,10 +247,11 @@ const results = await customRunner({
 
 | Runner | Description | Use Case | Status |
 |--------|-------------|----------|--------|
+| `@expressjs/perf-runner-local` | Local Node.js | Default  | Available |
 | `@expressjs/perf-runner-vanilla` | Standard Node.js runtime | Baseline performance measurements | Available |
 | `@expressjs/perf-runner-nsolid` | N|Solid runtime with built-in monitoring | Enterprise monitoring capabilities | Available |
-| `@expressjs/perf-runner-datadog` | Node.js + Datadog APM agent | Datadog APM overhead analysis | Coming soon |
-| `@expressjs/perf-runner-newrelic` | Node.js + New Relic APM agent | New Relic APM overhead analysis | Coming soon |
+| `@expressjs/perf-runner-datadog` | Node.js + Datadog APM agent | Datadog APM overhead analysis | Help Wanted |
+| `@expressjs/perf-runner-newrelic` | Node.js + New Relic APM agent | New Relic APM overhead analysis | Help Wanted |
 
 ### Performance Analysis Examples
 

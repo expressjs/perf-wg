@@ -10,6 +10,7 @@ export class AutocannonCLI {
   isPresent = null;
   status = null;
   procs = [];
+  #results = [];
 
   duration = 60;
   connections = 100;
@@ -34,34 +35,56 @@ export class AutocannonCLI {
     // Check if present, but only once
     if (this.isPresent === null) {
       try {
-        await this.spawn(['-h']);
+        this.isPresent = this.spawn(['-h']);
+        await this.isPresent;
         this.isPresent = true;
       } catch (e) {
         // Set the status to the error we got
         this.status = e;
         this.isPresent = false;
       }
+    } if (typeof this.isPresent?.then === 'function') {
+      try {
+        await this.isPresent;
+      } catch (e) {
+        // ignore this one because it should have been caught already
+        // in the start call that hit the first condition
+      }
     }
 
     if (!this.isPresent) {
       this.status = this.status || 'not present';
-      throw new Error('executable not present', {
+      throw Object.assign(new Error('executable not present', {
         cause: this.status
+      }), {
+        code: 'EXECUTABLE_NOT_PRESENT',
       });
     }
 
     this.status = 'starting';
 
     const args = [
+      // NOTE: use aggregating multiple results later
+      // This doesnt work when workers is enabled, and
+      // this is currently not working as expected at all.
+      // AFAICT the requests and throughput histograms are not
+      // correctly populated when passing this option. Even when
+      // I copy what I see in autocannon to aggregate multiple
+      //
+      // '--skipAggregateResult',
+
       // -d/--duration SEC
       '-d', this.duration,
+
       // -c/--connections NUM
       '-c', this.connections,
+
       // -w/--workers NUM
       '-w', Math.min(this.connections, availableParallelism() || 8),
 
       // -j/--json
       '-j',
+
       // -n/--no-progress
       '-n',
 
@@ -82,25 +105,36 @@ export class AutocannonCLI {
 
     // url (positional)
     const url = opts.url ? new URL(opts.url, this.url) : this.url;
-    args.push(url.toString());
 
     // Run the process
-    const stdout = await this.spawn(args);
+    const stdout = await this.spawn(args, url);
 
-    const result = JSON.parse(stdout);
-    if (!result.requests.average) {
-      throw new Error(`${this.executable} produced invalid JSON output`);
+    let result;
+    try {
+      result = JSON.parse(stdout);
+    } catch (e) {
+      throw Object.assign(e, {
+        stdout
+      })
     }
 
+    this.#results.push(result);
     return result;
   }
 
-  async spawn (args = [], opts = {}) {
+  async spawn (args = [], url, opts = {}) {
     return new Promise((resolve, reject) => {
       if (this.status === 'aborted') {
         return reject(new Error('Aborted before start'));
       }
-      const proc = spawn(`${this.executable} ${shellQuote(args)}`, {
+      let cmd;
+      if (url) {
+        cmd = `${this.executable} ${shellQuote(args)} ${url.toString()}`;
+      } else {
+        cmd = `${this.executable} ${shellQuote(args)}`;
+      }
+
+      const proc = spawn(cmd, {
         shell: true
       }, opts);
 

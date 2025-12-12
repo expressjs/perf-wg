@@ -7,6 +7,7 @@ export class Wrk2CLI {
   isPresent = null;
   status = null;
   procs = [];
+  results = [];
 
   duration = 60;
   connections = 100;
@@ -44,8 +45,10 @@ export class Wrk2CLI {
 
     if (!this.isPresent) {
       this.status = this.status || 'not present';
-      throw new Error('executable not present', {
+      throw Object.assign(new Error('executable not present', {
         cause: this.status
+      }), {
+        code: 'EXECUTABLE_NOT_PRESENT',
       });
     }
 
@@ -61,12 +64,12 @@ export class Wrk2CLI {
 
     // TODO: I don't see docs on how to do this with wrk2
     if (opts.method || this.method) {
-      throw new Error('not yet supported');
+      throw new Error('method not yet supported');
     }
 
     // TODO: I don't see docs on how to do this with wrk2
     if (opts.body || this.body) {
-      throw new Error('not yet supported');
+      throw new Error('body not yet supported');
     }
 
     // -H/--headers K=V
@@ -86,6 +89,7 @@ export class Wrk2CLI {
       throw new Error(`${this.executable} produced invalid JSON output`);
     }
 
+    this.results.push(result);
     return result;
   }
 

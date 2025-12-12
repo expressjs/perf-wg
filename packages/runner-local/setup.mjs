@@ -50,20 +50,24 @@ export async function setup (cwd, opts = {}) {
   const { pkgPath, pkgBakPath } = await restore(cwd);
 
   // Read in package.json contets
-  const pkg = await import(pkgPath, {
+  const pkg = (await import(pkgPath, {
     with: {
       type: 'json'
     }
-  });
+  })).default;
 
   // Apply overrides
   if (opts.overrides) {
     await rename(pkgPath, pkgBakPath);
-    pkg.overrides = {
-      ...(pkg.overrides ?? {}),
-      ...opts.overrides
+    // Imports are immutable
+    const _pkg = {
+      ...pkg,
+      overrides: {
+        ...(pkg.overrides ?? {}),
+        ...opts.overrides
+      }
     };
-    await writeFile(pkgPath, JSON.stringify(pkg, null, 2));
+    await writeFile(pkgPath, JSON.stringify(_pkg, null, 2));
   }
 
   // node --run setup || npm run setup
@@ -71,6 +75,7 @@ export async function setup (cwd, opts = {}) {
     const nodePath = await realpath(process.execPath);
     await pExecFile(nodePath, ['--run', 'setup'], { cwd });
   } catch (e) {
+    console.error(e);
     const npmPath = await realpath(join(dirname(process.execPath), 'npm'));
     await pExecFile(npmPath, ['run', 'setup'], { cwd });
   }

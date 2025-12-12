@@ -1,6 +1,7 @@
 import { normalize, join, dirname } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
 import nv from '@pkgjs/nv';
+import autocannon from 'autocannon';
 
 // TODO: Add description to each flag
 export function help (opts = {}) {
@@ -28,6 +29,13 @@ export function help (opts = {}) {
     - @expressjs/perf-runner-nsolid: local docker based runner with nsolid
       - Flags: --force-rebuild
 `
+}
+
+function header (strs, ...values) {
+  const val = strs.reduce((v, s, i) => {
+    return v + s + (values[i] ? values[i] : '');
+  }, '');
+  return val + '\n' + Array(val.length).fill('=').join('');
 }
 
 export default function main (_opts = {}) {
@@ -77,6 +85,12 @@ export default function main (_opts = {}) {
         throw new Error(`Invalid duration: ${opts.duration}. Duration must be a positive integer (seconds).`);
       }
       opts.duration = parsedDuration;
+    }
+
+    // Parse overrides json
+    if (typeof opts.overrides === 'string') {
+      const parsedOverrides = JSON.parse(opts.overrides);
+      opts.overrides = parsedOverrides;
     }
 
     let completed = false;
@@ -146,8 +160,13 @@ export default function main (_opts = {}) {
       console.log(`written to: ${outputFile}`);
     } else {
       console.log(...Object.entries(results).flatMap(([k, v]) => {
-        return ['\n', k, '\n', v];
+        return ['\n', header`${k}`, '\n', v, '\n'];
       }));
+    }
+
+    for (const res of results.clientResults) {
+      console.log(header`${res.url} ${res['2xx'] || '0'} 2xx's, ${res['non2xx'] || '0'} non-2xx's, ${res.errors || '0'} errors`);
+      console.log(autocannon.printResult(res));
     }
     completed = true;
 

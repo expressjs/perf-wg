@@ -1,0 +1,56 @@
+name: Load Test
+on:
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        required: true
+        type: string
+        default: 'main'
+        description: 'The git ref to checkout'
+      node:
+        required: true
+        type: string
+        default: '24'
+        description: 'Node version to use, accepts semver ranges and some aliases like latest_lts'
+      test:
+        required: true
+        type: string
+        default: '@expressjs/perf-load-example'
+      overrides:
+        type: string
+
+jobs:
+  load:
+    name: Load Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{inputs.gitRef}}
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{inputs.node}}
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --include=dev
+
+      - name: Run load test
+        run: |
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          npm run load -- \
+            --write \
+            --parallel \
+            --test="${{inputs.test}}" \
+            --node="${{inputs.node}}" \
+            --overrides="${{inputs.overrides || '{}'}}" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-load-test-${{github.run_id}}
+          path: ./perf/load/*/results/result-*.json
+          retention-days: 1

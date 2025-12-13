@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Benchmark Dashboard</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f4f4f9;
+        color: #333;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      .section {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        font-weight: 600;
+        color: #666;
+      }
+
+      .diff-pos {
+        color: #2da44e;
+        font-weight: bold;
+      }
+
+      .diff-neg {
+        color: #cf222e;
+        font-weight: bold;
+      }
+
+      .metric-value {
+        font-family: monospace;
+      }
+
+      .meta-table td {
+        padding: 4px 8px;
+        border: none;
+      }
+
+      .meta-table tr:nth-child(odd) {
+        background-color: #f8f9fa;
+      }
+
+      .metadata-status {
+        padding: 10px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .metadata-same {
+        background-color: #d1f4e0;
+        color: #0d6832;
+        border: 1px solid #9dd9b8;
+      }
+
+      .metadata-different {
+        background-color: #ffe8cc;
+        color: #a65e00;
+        border: 1px solid #ffc266;
+      }
+
+      .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      .comparison-table th,
+      .comparison-table td {
+        text-align: left;
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .comparison-table th {
+        font-weight: 600;
+        color: #666;
+        background-color: #f8f9fa;
+      }
+
+      .row-different {
+        background-color: #fff5e6;
+      }
+
+      .value-cell {
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .badge-same {
+        background-color: #e9ecef;
+        color: #495057;
+      }
+
+      .badge-different {
+        background-color: #ffd1b3;
+        color: #a65e00;
+      }
+
+      .badge-improved {
+        background-color: #d1f4e0;
+        color: #0d6832;
+      }
+
+      .badge-regressed {
+        background-color: #ffd1d1;
+        color: #c92a2a;
+      }
+
+      .row-improved {
+        background-color: #f0f9f4;
+      }
+
+      .row-regressed {
+        background-color: #fff0f0;
+      }
+
+      #baseline-flamegraph > svg,
+      #current-flamegraph > svg {
+        width: 100%;
+        height: auto;
+      }
+
+      /* Mobile responsive styles */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        h2 {
+          font-size: 1.25rem;
+        }
+
+        h3 {
+          font-size: 1.1rem;
+        }
+
+        .section {
+          padding: 15px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+
+        table {
+          font-size: 0.85rem;
+        }
+
+        th,
+        td {
+          padding: 8px 4px;
+        }
+
+        .value-cell {
+          font-size: 0.8em;
+        }
+
+        .status-badge {
+          font-size: 0.75em;
+          padding: 2px 6px;
+        }
+
+        .comparison-table {
+          display: block;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 5px;
+        }
+
+        h1 {
+          font-size: 1.25rem;
+        }
+
+        .section {
+          padding: 10px;
+          margin-bottom: 15px;
+        }
+
+        table {
+          font-size: 0.75rem;
+        }
+
+        th,
+        td {
+          padding: 6px 2px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Benchmark Dashboard</h1>
+
+    <div class="section">
+      <h2>Metadata</h2>
+      <div id="metadata-comparison"></div>
+    </div>
+
+    <div class="section">
+      <h2>Results</h2>
+      <div id="results-comparison"></div>
+    </div>
+
+    <div class="section flamegraph-section">
+      <h2>Flamegraphs</h2>
+      <div class="grid">
+        <div>
+          <h3>Baseline</h3>
+          <div
+            id="baseline-flamegraph"
+            style="border: 1px solid #ddd; min-height: 400px; overflow: auto"
+          ></div>
+        </div>
+        <div>
+          <h3>Current</h3>
+          <div
+            id="current-flamegraph"
+            style="border: 1px solid #ddd; min-height: 400px; overflow: auto"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function formatMetadataValue(value) {
+        if (value === null || value === undefined) return 'N/A';
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'number') return value.toLocaleString();
+        if (typeof value === 'string') return value;
+        if (Array.isArray(value)) {
+          return `Array (${value.length} items)`;
+        }
+        if (typeof value === 'object') {
+          return `Object (${Object.keys(value).length} properties)`;
+        }
+        return String(value);
+      }
+
+      function valuesEqual(val1, val2) {
+        return JSON.stringify(val1) === JSON.stringify(val2);
+      }
+
+      // Determine if a metric change is good or bad
+      // Returns: 'improved', 'regressed', or 'same'
+      function evaluateChange(metricName, baseVal, currVal, parentKey = '') {
+        if (typeof baseVal !== 'number' || typeof currVal !== 'number') {
+          return valuesEqual(baseVal, currVal) ? 'same' : 'neutral';
+        }
+
+        if (baseVal === currVal) return 'same';
+
+        // Metrics where LOWER is better
+        const lowerIsBetter = [
+          'errors',
+          'timeouts',
+          'mismatches',
+          'non2xx',
+          'resets',
+          '4xx',
+          '5xx',
+          'stddev',
+        ];
+
+        // For latency-related metrics, lower is always better (except totalCount)
+        const isLatencyMetric =
+          (parentKey.toLowerCase() === 'latency' ||
+            metricName.toLowerCase().includes('latency')) &&
+          metricName.toLowerCase() !== 'totalcount';
+
+        // Metrics where HIGHER is better
+        const higherIsBetter = [
+          '1xx',
+          '2xx',
+          '3xx',
+          'total',
+          'sent',
+          'average',
+          'mean',
+        ];
+
+        // For requests and throughput, higher is better (except stddev)
+        const isRequestsThroughputMetric =
+          (parentKey.toLowerCase() === 'requests' ||
+            parentKey.toLowerCase() === 'throughput') &&
+          metricName.toLowerCase() !== 'stddev';
+
+        const lowerKey = metricName.toLowerCase();
+        const isLowerBetter =
+          lowerIsBetter.some((key) => lowerKey === key) || isLatencyMetric;
+        const isHigherBetter =
+          higherIsBetter.some((key) => lowerKey === key) ||
+          isRequestsThroughputMetric;
+
+        if (isLowerBetter) {
+          return currVal < baseVal ? 'improved' : 'regressed';
+        } else if (isHigherBetter) {
+          return currVal > baseVal ? 'improved' : 'regressed';
+        }
+
+        // For unknown metrics, just indicate different
+        return 'neutral';
+      }
+
+      function renderMetadataComparison(baseline, current) {
+        const container = document.getElementById('metadata-comparison');
+
+        if (!baseline || !current) {
+          container.innerHTML = '<em>Missing metadata</em>';
+          return;
+        }
+
+        const metaKeys = ['serverMetadata', 'clientMetadata'];
+        let html = '';
+
+        metaKeys.forEach((metaType) => {
+          const baseData = baseline[metaType];
+          const currData = current[metaType];
+
+          if (!baseData && !currData) return;
+
+          html += `<h3>${metaType}</h3>`;
+          html += `<table class="comparison-table">`;
+          html += `<thead><tr>
+            <th>Field</th>
+            <th>Baseline</th>
+            <th>Current</th>
+            <th>Status</th>
+          </tr></thead><tbody>`;
+
+          // Get all unique keys from both baseline and current
+          const allKeys = new Set([
+            ...(baseData ? Object.keys(baseData) : []),
+            ...(currData ? Object.keys(currData) : []),
+          ]);
+
+          Array.from(allKeys)
+            .sort()
+            .forEach((key) => {
+              const baseVal = baseData?.[key];
+              const currVal = currData?.[key];
+              const isSame = valuesEqual(baseVal, currVal);
+
+              const baseFormatted = formatMetadataValue(baseVal);
+              const currFormatted = formatMetadataValue(currVal);
+
+              const rowClass = isSame ? 'row-same' : 'row-different';
+              const badgeClass = isSame ? 'badge-same' : 'badge-different';
+              const statusText = isSame ? 'Same' : 'Different';
+
+              html += `<tr class="${rowClass}">
+              <td><strong>${key}</strong></td>
+              <td class="value-cell">${baseFormatted}</td>
+              <td class="value-cell">${currFormatted}</td>
+              <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+            </tr>`;
+            });
+
+          html += '</tbody></table>';
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renderMetadata(data, elementId) {
+        const container = document.getElementById(elementId);
+        if (!data) {
+          container.innerHTML = '<em>No data</em>';
+          return;
+        }
+
+        const metaKeys = ['serverMetadata', 'clientMetadata'];
+        let html = '';
+
+        metaKeys.forEach((key) => {
+          if (data[key]) {
+            html += `<h4>${key}</h4><table class="meta-table">`;
+            for (const [k, v] of Object.entries(data[key])) {
+              const formattedValue = formatMetadataValue(v);
+              html += `<tr><td><strong>${k}</strong></td><td>${formattedValue}</td></tr>`;
+            }
+            html += '</table>';
+          }
+        });
+        container.innerHTML = html;
+      }
+
+      function formatValue(val) {
+        if (typeof val === 'number')
+          return val.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        return val;
+      }
+
+      function renderResultsComparison(baseline, current) {
+        const container = document.getElementById('results-comparison');
+
+        if (!baseline || !current) {
+          container.innerHTML = '<em>Missing results data</em>';
+          return;
+        }
+
+        const resultKeys = ['clientResults', 'serverResults'];
+        let html = '';
+
+        resultKeys.forEach((resultType) => {
+          const baseData = baseline[resultType];
+          const currData = current[resultType];
+
+          if (!baseData && !currData) return;
+
+          html += `<h3>${resultType}</h3>`;
+          html += `<table class="comparison-table">`;
+          html += `<thead><tr>
+            <th>Metric</th>
+            <th>Baseline</th>
+            <th>Current</th>
+            <th>Change</th>
+            <th>Status</th>
+          </tr></thead><tbody>`;
+
+          // Get all unique keys from both baseline and current
+          const allKeys = new Set([
+            ...(baseData ? Object.keys(baseData) : []),
+            ...(currData ? Object.keys(currData) : []),
+          ]);
+
+          // Sort and filter keys to skip large nested objects
+          const skipKeys = [
+            'rawPerfData',
+            'flamegraph',
+            'lockfile',
+            'output',
+            'statusCodeStats',
+          ];
+
+          Array.from(allKeys)
+            .filter((key) => !skipKeys.includes(key))
+            .sort()
+            .forEach((key) => {
+              const baseVal = baseData?.[key];
+              const currVal = currData?.[key];
+
+              // Skip if both are objects (nested data)
+              if (
+                typeof baseVal === 'object' &&
+                baseVal !== null &&
+                !Array.isArray(baseVal) &&
+                typeof currVal === 'object' &&
+                currVal !== null &&
+                !Array.isArray(currVal)
+              ) {
+                // Handle nested objects like latency, requests, throughput
+                if (baseVal && currVal) {
+                  html += `<tr class="row-same" style="background-color: #e8f4f8;"><td colspan="5"><strong>${key}</strong></td></tr>`;
+
+                  const nestedKeys = new Set([
+                    ...Object.keys(baseVal),
+                    ...Object.keys(currVal),
+                  ]);
+
+                  // Skip totalCount for latency metrics
+                  const skipNestedKeys =
+                    key.toLowerCase() === 'latency' ? ['totalCount'] : [];
+
+                  Array.from(nestedKeys)
+                    .filter((nKey) => !skipNestedKeys.includes(nKey))
+                    .sort()
+                    .forEach((nestedKey) => {
+                      const bVal = baseVal[nestedKey];
+                      const cVal = currVal[nestedKey];
+
+                      if (
+                        typeof bVal === 'number' &&
+                        typeof cVal === 'number'
+                      ) {
+                        const evaluation = evaluateChange(
+                          nestedKey,
+                          bVal,
+                          cVal,
+                          key
+                        );
+                        const diff =
+                          bVal !== 0 ? ((cVal - bVal) / bVal) * 100 : 0;
+                        const diffDisplay =
+                          diff !== 0
+                            ? `${diff > 0 ? '+' : ''}${diff.toFixed(2)}%`
+                            : '0%';
+                        const diffClass =
+                          diff > 0 ? 'diff-pos' : diff < 0 ? 'diff-neg' : '';
+
+                        let rowClass = '';
+                        let badgeClass = 'badge-same';
+                        let statusText = 'Same';
+
+                        if (evaluation === 'improved') {
+                          rowClass = 'row-improved';
+                          badgeClass = 'badge-improved';
+                          statusText = '✓ Improved';
+                        } else if (evaluation === 'regressed') {
+                          rowClass = 'row-regressed';
+                          badgeClass = 'badge-regressed';
+                          statusText = '✗ Regressed';
+                        } else if (evaluation === 'neutral') {
+                          rowClass = 'row-different';
+                          badgeClass = 'badge-different';
+                          statusText = 'Different';
+                        }
+
+                        html += `<tr class="${rowClass}">
+                        <td style="padding-left: 30px;">${nestedKey}</td>
+                        <td class="value-cell">${formatValue(bVal)}</td>
+                        <td class="value-cell">${formatValue(cVal)}</td>
+                        <td class="${diffClass}">${diffDisplay}</td>
+                        <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+                      </tr>`;
+                      }
+                    });
+                }
+                return;
+              }
+
+              const isSame = valuesEqual(baseVal, currVal);
+              const baseFormatted = formatMetadataValue(baseVal);
+              const currFormatted = formatMetadataValue(currVal);
+
+              // Calculate percentage change for numbers
+              let changeDisplay = '-';
+              let diffClass = '';
+              if (typeof baseVal === 'number' && typeof currVal === 'number') {
+                const diff =
+                  baseVal !== 0 ? ((currVal - baseVal) / baseVal) * 100 : 0;
+                changeDisplay = `${diff > 0 ? '+' : ''}${diff.toFixed(2)}%`;
+                diffClass = diff > 0 ? 'diff-pos' : diff < 0 ? 'diff-neg' : '';
+              }
+
+              const evaluation = evaluateChange(key, baseVal, currVal);
+              let rowClass = 'row-same';
+              let badgeClass = 'badge-same';
+              let statusText = 'Same';
+
+              if (evaluation === 'improved') {
+                rowClass = 'row-improved';
+                badgeClass = 'badge-improved';
+                statusText = '✓ Improved';
+              } else if (evaluation === 'regressed') {
+                rowClass = 'row-regressed';
+                badgeClass = 'badge-regressed';
+                statusText = '✗ Regressed';
+              } else if (evaluation === 'neutral') {
+                rowClass = 'row-different';
+                badgeClass = 'badge-different';
+                statusText = 'Different';
+              }
+
+              html += `<tr class="${rowClass}">
+                <td><strong>${key}</strong></td>
+                <td class="value-cell">${baseFormatted}</td>
+                <td class="value-cell">${currFormatted}</td>
+                <td class="${diffClass}">${changeDisplay}</td>
+                <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+              </tr>`;
+            });
+
+          html += '</tbody></table>';
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renderComparison(baseline, current) {
+        renderMetadataComparison(baseline, current);
+        renderResultsComparison(baseline, current);
+        renderFlamegraphs(baseline, current);
+      }
+
+      // Store flamegraph data globally for fullscreen access
+      let flamegraphData = {
+        baseline: null,
+        current: null,
+      };
+
+      // Store iframe references for resize handling
+      let flamegraphIframes = [];
+
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      function adjustIframeHeight(iframe) {
+        try {
+          const iframeDoc =
+            iframe.contentDocument || iframe.contentWindow.document;
+          const svg = iframeDoc.querySelector('svg');
+          if (svg) {
+            // Reset iframe height first to allow content to shrink
+            iframe.style.height = 'auto';
+
+            // Force SVG to recalculate dimensions
+            svg.style.width = '100%';
+            svg.style.height = 'auto';
+
+            // Trigger reflow
+            void svg.offsetHeight;
+          }
+
+          setTimeout(() => {
+            // Get the actual rendered height
+            const body = iframeDoc.body;
+            const html = iframeDoc.documentElement;
+            const contentHeight = Math.max(
+              body.scrollHeight,
+              body.offsetHeight,
+              html.clientHeight,
+              html.scrollHeight,
+              html.offsetHeight
+            );
+            iframe.style.height = contentHeight + 'px';
+          }, 150);
+        } catch (e) {
+          console.error('Error adjusting iframe height:', e);
+        }
+      }
+
+      function handleResize() {
+        flamegraphIframes.forEach((iframe) => {
+          if (iframe && iframe.parentNode) {
+            adjustIframeHeight(iframe);
+          }
+        });
+      }
+
+      const debouncedResize = debounce(handleResize, 250);
+
+      window.addEventListener('resize', debouncedResize);
+
+      function injectFlamegraphHTML(container, html) {
+        // Create a wrapper div with a unique scope
+        const wrapper = document.createElement('div');
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+
+        // Use srcdoc pattern with iframe for proper isolation
+        const iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        iframe.sandbox = 'allow-scripts allow-same-origin';
+
+        container.innerHTML = '';
+        container.appendChild(iframe);
+
+        // Store iframe reference
+        flamegraphIframes.push(iframe);
+
+        // Write content to iframe
+        const iframeDoc =
+          iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframeDoc.write(html);
+        iframeDoc.close();
+
+        // Apply SVG styles and adjust iframe height
+        setTimeout(() => {
+          try {
+            const svg = iframeDoc.querySelector('svg');
+            if (svg) {
+              svg.style.width = '100%';
+              svg.style.height = 'auto';
+
+              // Adjust iframe height to match content
+              setTimeout(() => {
+                adjustIframeHeight(iframe);
+              }, 100);
+            }
+          } catch (e) {
+            console.error('Error styling SVG:', e);
+          }
+        }, 0);
+      }
+
+      function renderFlamegraphs(baseline, current) {
+        const baselineContainer = document.getElementById(
+          'baseline-flamegraph'
+        );
+        const currentContainer = document.getElementById('current-flamegraph');
+
+        const baselineFlamegraph = baseline?.serverResults?.flamegraph;
+        const currentFlamegraph = current?.serverResults?.flamegraph;
+
+        // Store for fullscreen mode
+        flamegraphData.baseline = baselineFlamegraph;
+        flamegraphData.current = currentFlamegraph;
+
+        if (baselineFlamegraph) {
+          injectFlamegraphHTML(baselineContainer, baselineFlamegraph);
+        } else {
+          baselineContainer.innerHTML =
+            '<em style="padding: 20px; display: block;">No flamegraph data</em>';
+        }
+
+        if (currentFlamegraph) {
+          injectFlamegraphHTML(currentContainer, currentFlamegraph);
+        } else {
+          currentContainer.innerHTML =
+            '<em style="padding: 20px; display: block;">No flamegraph data</em>';
+        }
+      }
+
+      async function init(params) {
+        try {
+          const baselineJson = await fetch('baseline.json').then((res) =>
+            res.text()
+          );
+          const currentJson = await fetch('current.json').then((res) => res.text());
+
+          const baseline = JSON.parse(baselineJson);
+          const current = JSON.parse(currentJson);
+
+          if (baseline && current) {
+            renderComparison(baseline, current);
+          }
+        } catch (e) {
+          console.error('Error rendering dashboard:', e);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>

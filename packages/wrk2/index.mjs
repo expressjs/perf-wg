@@ -4,9 +4,16 @@ import { quote as shellQuote } from 'shell-quote';
 
 export class Wrk2CLI {
   executable = 'wrk2';
+
+  // NOTE: keeping isPresent on the api because it seems useful
+  // if it turns out not to be, we can remove the property and just
+  // throw when not
   isPresent = null;
+  #isPresentProc;
+
   status = null;
   procs = [];
+  results = [];
 
   duration = 60;
   connections = 100;
@@ -30,24 +37,8 @@ export class Wrk2CLI {
   }
 
   async start (opts = {}) {
-    // Check if present, but only once
-    if (this.isPresent === null) {
-      try {
-        await this.spawn(['-h']);
-        this.isPresent = true;
-      } catch (e) {
-        // Set the status to the error we got
-        this.status = e; 
-        this.isPresent = false;
-      }
-    }
-
-    if (!this.isPresent) {
-      this.status = this.status || 'not present';
-      throw new Error('executable not present', {
-        cause: this.status
-      });
-    }
+    // Check if the executable is present, throw if not
+    await this.checkIsPresent();
 
     this.status = 'starting';
 
@@ -61,12 +52,12 @@ export class Wrk2CLI {
 
     // TODO: I don't see docs on how to do this with wrk2
     if (opts.method || this.method) {
-      throw new Error('not yet supported');
+      throw new Error('method not yet supported');
     }
 
     // TODO: I don't see docs on how to do this with wrk2
     if (opts.body || this.body) {
-      throw new Error('not yet supported');
+      throw new Error('body not yet supported');
     }
 
     // -H/--headers K=V
@@ -75,7 +66,7 @@ export class Wrk2CLI {
     }
 
     // url (positional)
-    const url = opts.url ? new Url(opts.url, this.url) : this.url;
+    const url = opts.url || opts.path ? new Url(opts.url || opts.path, this.url) : this.url;
     args.push(url.toString());
 
     // Run the process
@@ -86,7 +77,35 @@ export class Wrk2CLI {
       throw new Error(`${this.executable} produced invalid JSON output`);
     }
 
+    this.results.push(result);
     return result;
+  }
+
+  async checkIsPresent () {
+    if (!this.#isPresentProc) {
+      try {
+        this.#isPresentProc = this.spawn(['-h']);
+        await this.#isPresentProc;
+        this.isPresent = true;
+      } catch (e) {
+        this.isPresent = false;
+        this.status = Object.assign(new Error('executable not present', {
+          cause: e
+        }), {
+          code: 'EXECUTABLE_NOT_PRESENT',
+        });
+        throw this.status;
+      }
+    } else {
+      try {
+        await this.#isPresentProc;
+      } catch (e) {
+        // Ignored this error because it should
+        // be handled by the first caller
+        throw this.status;
+      }
+
+    }
   }
 
   async spawn (args = [], opts = {}) {

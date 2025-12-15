@@ -1,0 +1,95 @@
+name: Compare Load Tests
+on:
+  workflow_call:
+    inputs:
+      gitRef:
+        required: true
+        type: string
+        default: 'main'
+        description: 'The git ref to checkout'
+      path:
+        required: true
+        type: string
+      baselineId:
+        required: true
+        type: string
+      testId:
+        required: true
+        type: string
+    outputs:
+      summary:
+        description: "Run id for fetching artifacts"
+        value: ${{ jobs.load.outputs.summary }}
+
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        required: true
+        type: string
+        default: 'main'
+        description: 'The git ref to checkout'
+      path:
+        required: true
+        type: string
+      baselineId:
+        required: true
+        type: string
+      testId:
+        required: true
+        type: string
+
+permissions:
+  actions: read
+
+jobs:
+  load:
+    name: Compare Load Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{inputs.gitRef}}
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{inputs.node}}
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --include=dev
+
+      - name: Download baseline results
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-load-test-${{inputs.baselineId}}
+          path: ${{inputs.path}}/..
+          run-id: ${{inputs.baselineId}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Find baseline file
+        id: baseline
+        run: |
+          ls -lah "${{inputs.path}}/results"
+          echo "path=$(ls "${{inputs.path}}/results" | grep "result-.*\.json" | head -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-load-test-${{inputs.testId}}
+          path: ${{inputs.path}}/..
+          run-id: ${{inputs.testId}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Find test file
+        id: test
+        run: |
+           ls -lah "${{inputs.path}}/results"
+           echo "path=$(ls "${{inputs.path}}/results" | grep "result-.*\.json" | grep -v "${{steps.baseline.outputs.path}}" | head -n 1)" >> "$GITHUB_OUTPUT"
+
+      - name: Compare
+        id: compare
+        run: |
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          npm run compare -- "${{inputs.path}}/results/${{steps.baseline.outputs.path}}" "${{inputs.path}}/results/${{steps.test.outputs.path}}" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "summary=\"$GITHUB_STEP_SUMMARY\" >> "$GITHUB_OUTPUT"

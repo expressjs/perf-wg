@@ -2,17 +2,23 @@ import { AutocannonCLI } from '@expressjs/perf-autocannon';
 import { Wrk2CLI } from '@expressjs/perf-wrk2';
 
 export function startLoad (opts = {}) {
-  const requests = opts.requests || [{
+  let requests = opts.requests || [{
     method: 'GET',
     path: '/',
     headers: {},
     body: undefined
   }];
 
-  if (!opts.parallel && requests.length > 1) {
-    console.log('Running multiple request types in paralle may have unreliable results.');
-    console.warn('To enable this pass --parallel. Using only the first request from the test set.');
-    requests = [requests[0]];
+  if (requests.length === 0) {
+    throw new Error('no requests specified');
+  }
+
+  if (requests.length > 1) {
+    console.log('Running multiple request types in parallel may have unreliable results.');
+    if (!opts.parallel) {
+      console.warn('To enable this pass --parallel. Using only the first request from the test set.');
+      requests = [requests[0]];
+    }
   }
 
   const requesters = [];
@@ -42,9 +48,13 @@ export function startLoad (opts = {}) {
     requesters.push(wrk);
   }
 
+  if (requesters.length === 0) {
+    throw new Error('no clis available');
+  }
+
   // Start here, await in .results()
-  const toAwait = requesters.flatMap((requester) => {
-    return requests.map((request) => {
+  const toAwait = requests.flatMap((request) => {
+    return requesters.map((requester) => {
       return requester.start(request);
     });
   });
@@ -55,8 +65,19 @@ export function startLoad (opts = {}) {
         return req.close();
       }));
     },
-    results: () => {
-      return Promise.allSettled(toAwait);
+    results: async () => {
+      const r = await Promise.allSettled(toAwait);
+      return r.reduce((a, r) => {
+        if (r.status === 'rejected') {
+          if (r.reason.code !== 'EXECUTABLE_NOT_PRESENT') {
+            throw r.reason;
+          }
+        }
+        if (r.status === 'fulfilled') {
+          a.push(r.value);
+        }
+        return a;
+      }, []);
     }
   };
 }

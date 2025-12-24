@@ -8,8 +8,17 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
+
+let app;
+if (process.env.USE_UWS) {
+  const uWS = require('uWebSockets.js');
+  const expressify = require('uwebsockets-express').default;
+  const uwsApp = uWS.App();
+  app = expressify(uwsApp);
+} else {
+  app = express();
+}
 
 // Middleware stack
 app.use(helmet());
@@ -423,23 +432,16 @@ app.use((req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, (err) => {
-  if (err) {
-    console.error(`Error starting server: ${err.message}`)
-    process.exit(1)
+app.listen(PORT, (token) => {
+  // uwebsockets-express passes a token, express passes nothing or an error
+  if (process.env.USE_UWS && !token) {
+    console.error(`Error starting server on port ${PORT}`);
+    process.exit(1);
   }
   console.log(`Todo API server listening on port ${PORT}`);
   console.log(`PID: ${process.pid}`);
   console.log(`Node version: ${process.version}`);
   console.log(`startup: ${process.hrtime(start)}`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
-  });
 });
 
 module.exports = app;

@@ -56,17 +56,48 @@ export async function setup (cwd, opts = {}) {
     }
   })).default;
 
-  // Apply overrides
-  if (opts.overrides) {
+  // Apply overrides and uws dependencies
+  const needsModification = opts.overrides || opts.uws;
+  if (needsModification) {
     await rename(pkgPath, pkgBakPath);
     // Imports are immutable
     const _pkg = {
-      ...pkg,
-      overrides: {
+      ...pkg
+    };
+
+    // Apply overrides
+    if (opts.overrides) {
+      _pkg.overrides = {
         ...(pkg.overrides ?? {}),
         ...opts.overrides
+      };
+    }
+
+    // Add uwebsockets-express dependencies when --uws is enabled
+    if (opts.uws) {
+      // Use explicit version from overrides if provided, otherwise auto-detect
+      let uwsExpressVersion = opts.overrides?.['uwebsockets-express'];
+      
+      if (!uwsExpressVersion) {
+        // Determine uwebsockets-express version based on express version
+        const expressVersion = opts.overrides?.express || pkg.dependencies?.express || '';
+        // Handle semver ranges like ^4, ~4, 4.x, 4.21.2, etc.
+        const isExpress4 = /^[~^]?4|^4\./.test(expressVersion);
+        uwsExpressVersion = isExpress4 ? '1.3.13' : '2.0.0';
       }
-    };
+      
+      _pkg.dependencies = {
+        ...(pkg.dependencies ?? {}),
+        'uWebSockets.js': 'uNetworking/uWebSockets.js#v20.51.0',
+        'uwebsockets-express': uwsExpressVersion
+      };
+
+      // Remove uwebsockets-express from overrides to avoid conflict with dependency
+      if (_pkg.overrides?.['uwebsockets-express']) {
+        delete _pkg.overrides['uwebsockets-express'];
+      }
+    }
+
     await writeFile(pkgPath, JSON.stringify(_pkg, null, 2));
   }
 

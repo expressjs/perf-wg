@@ -8,7 +8,13 @@ export async function startServer (cwd, opts = {}) {
   }
   return new Promise((resolve, reject) => {
     const test = fileURLToPath(import.meta.resolve(opts.test));
-    const cp = execFile(process.execPath, [ test ], { cwd });
+    const cp = execFile(process.execPath, [ test ], { 
+      cwd,
+      env: {
+        ...process.env,
+        ...(opts.uws ? { USE_UWS: '1' } : {})
+      }
+    });
 
     const server = {
       metadata: {

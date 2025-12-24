@@ -1,8 +1,17 @@
 const start = process.hrtime();
-const express = require('express');
 const expressVersion = require('express/package.json').version;
 
-const app = express();
+let app;
+if (process.env.USE_UWS) {
+  const uWS = require('uWebSockets.js');
+  const expressify = require('uwebsockets-express').default;
+  const uwsApp = uWS.App();
+  app = expressify(uwsApp);
+} else {
+  const express = require('express');
+  app = express();
+}
+
 app.get(expressVersion.startsWith('4.') ? '*' : '*path', (req, res) => {
   res.status(200).json({
     hello: 'world!',

@@ -2,7 +2,16 @@ const start = process.hrtime();
 const express = require('express');
 const expressVersion = require('express/package.json').version;
 
-const app = express();
+let app;
+if (process.env.USE_UWS) {
+  const uWS = require('uWebSockets.js');
+  const expressify = require('uwebsockets-express').default;
+  const uwsApp = uWS.App();
+  app = expressify(uwsApp);
+} else {
+  app = express();
+}
+
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.text());

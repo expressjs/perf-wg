@@ -1,7 +1,16 @@
 const start = process.hrtime();
-const express = require('express');
 
-const app = express();
+let app;
+if (process.env.USE_UWS) {
+  const uWS = require('uWebSockets.js');
+  const expressify = require('uwebsockets-express').default;
+  const uwsApp = uWS.App();
+  app = expressify(uwsApp);
+} else {
+  const express = require('express');
+  app = express();
+}
+
 app.set('query parser', 'extended');
 app.get('*path', (req, res) => {
   res.status(200).json({

@@ -1,4 +1,5 @@
 import { normalize, join, dirname } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { writeFile, mkdir } from 'node:fs/promises';
 import nv from '@pkgjs/nv';
 import autocannon from 'autocannon';
@@ -48,7 +49,9 @@ export default function main (_opts = {}) {
 
     let conf = {};
     try {
-      conf = (await import(join(cwd, _opts.config || 'expf.config.json'), {
+      const configPath = join(cwd, _opts.config || 'expf.config.json');
+      const configUrl = pathToFileURL(configPath).href;
+      conf = (await import(configUrl, {
         with: {
           type: 'json'
         }

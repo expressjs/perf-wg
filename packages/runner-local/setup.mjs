@@ -7,6 +7,7 @@ import {
   constants as fsConstants
 } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { execFile } from 'node:child_process';
 
@@ -50,7 +51,8 @@ export async function setup (cwd, opts = {}) {
   const { pkgPath, pkgBakPath } = await restore(cwd);
 
   // Read in package.json contets
-  const pkg = (await import(pkgPath, {
+  const pkgUrl = pathToFileURL(pkgPath).href;
+  const pkg = (await import(pkgUrl, {
     with: {
       type: 'json'
     }

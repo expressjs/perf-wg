@@ -8,7 +8,7 @@
     "lint:fix": "semistandard --fix"
   },
   "bin": {
-    "expf": "./bin/expf.sh"
+    "expf": "./bin/expf-wrapper.mjs"
   },
   "keywords": [],
   "author": "",

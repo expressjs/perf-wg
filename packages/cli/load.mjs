@@ -48,7 +48,8 @@ export default function main (_opts = {}) {
 
     let conf = {};
     try {
-      conf = (await import(join(cwd, _opts.config || 'expf.config.json'), {
+      const configPath = join(cwd, _opts.config || 'expf.config.json');
+      conf = (await import(configPath, {
         with: {
           type: 'json'
         }

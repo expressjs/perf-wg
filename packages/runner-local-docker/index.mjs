@@ -179,6 +179,12 @@ export function createRunner (runnerConfig = {}) {
     await server.close();
 
     return {
+      options: {
+        runner: `local-docker-${name}`,
+        node: opts.node,
+        overrides: opts.overrides,
+        test: opts.test
+      },
       serverMetadata: server.metadata,
       clientMetadata: client.metadata,
       serverResults,

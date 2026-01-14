@@ -36,6 +36,12 @@ export default async function runner (_opts = {}) {
   await cleanup(cwd);
 
   return {
+    options: {
+      runner: 'local',
+      node: opts.node,
+      overrides: opts.overrides,
+      test: opts.test
+    },
     serverMetadata: server.metadata,
     clientMetadata: client.metadata,
     serverResults,

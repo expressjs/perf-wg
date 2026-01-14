@@ -1,6 +1,13 @@
 name: PR
 on:
   pull_request:
+    paths:
+      - 'package[-lock].json'
+      - '.github/workflows/**'
+      - 'expf.config.json'
+      - 'packages/**'
+      - 'servers/**'
+      - 'perf/load/**'
   workflow_call:
 
 jobs:

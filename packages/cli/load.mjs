@@ -22,12 +22,22 @@ export function help (opts = {}) {
     --config=./expf.config.json
     --[no-]write
     --[no-]parallel
+    --uws                              Enable uWebSockets.js via uwebsockets-express
+                                       (auto-selects v1.3.13 for Express 4, v2.0.0 for Express 5)
 
   Runners:
     - @expressjs/perf-runner-vanilla: local docker based runner
       - Flags: --force-rebuild
     - @expressjs/perf-runner-nsolid: local docker based runner with nsolid
       - Flags: --force-rebuild
+
+  Examples:
+
+    # Express 5 (default) with uWebSockets.js
+    expf load --uws
+
+    # Express 4 with uWebSockets.js
+    expf load --uws --overrides='{"express":"4.21.2"}'
 `
 }
 

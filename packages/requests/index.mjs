@@ -67,7 +67,7 @@ export function startLoad (opts = {}) {
     },
     results: async () => {
       const r = await Promise.allSettled(toAwait);
-      return r.reduce((a, r) => {
+      const results = r.reduce((a, r) => {
         if (r.status === 'rejected') {
           if (r.reason.code !== 'EXECUTABLE_NOT_PRESENT') {
             throw r.reason;
@@ -78,6 +78,10 @@ export function startLoad (opts = {}) {
         }
         return a;
       }, []);
+      if (results.length === 0) {
+        throw new AggregateError(r.map((p) => p.reason), 'all clients failed')
+      }
+      return results;
     }
   };
 }

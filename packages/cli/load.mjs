@@ -21,6 +21,7 @@ export function help (opts = {}) {
     --overrides='{"express":"latest"}'
     --config=./expf.config.json
     --[no-]write
+    --output=./path/to/result.json
     --[no-]parallel
 
   Runners:
@@ -154,8 +155,8 @@ export default function main (_opts = {}) {
       signal: ac.signal
     });
 
-    if (opts.write !== false) {
-      const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
+    if (opts.output != null || opts.write !== false) {
+      const outputFile = opts.output ?? join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
       await mkdir(dirname(outputFile), { recursive: true });
       await writeFile(outputFile, JSON.stringify(results, null, 2));
       console.log(`written to: ${outputFile}`);

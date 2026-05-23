@@ -62,6 +62,11 @@ const { values, positionals } = parseArgs({
 
     'force-rebuild': {
       type: 'boolean'
+    },
+
+    uws: {
+      type: 'boolean',
+      default: false
     }
   }
 });

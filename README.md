@@ -309,6 +309,7 @@ async function runPerformanceAnalysis() {
   await fs.writeFile('performance-report.json', JSON.stringify(results, null, 2));
   console.log('Performance analysis complete. Results saved to performance-report.json');
 }
+```
 
 ### Runner Development
 

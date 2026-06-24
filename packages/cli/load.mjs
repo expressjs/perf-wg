@@ -3,7 +3,6 @@ import { writeFile, mkdir } from 'node:fs/promises';
 import nv from '@pkgjs/nv';
 import autocannon from 'autocannon';
 
-// TODO: Add description to each flag
 export function help (opts = {}) {
   return `$ expf load [flags]
 
@@ -12,17 +11,37 @@ export function help (opts = {}) {
   Flags:
 
     --cwd=${opts.cwd || normalize(join(import.meta.dirname, '..', '..'))}
+      Working directory for the project
+
     --runner=@expressjs/perf-runner-local
+      Runner package to use for executing the test
+
     --repo=https://github.com/expressjs/perf-wg.git
+      Git repository to clone and test
+
     --repo-ref=master
+      Git branch/ref to checkout
+
     --test=@expressjs/perf-load-example
+      Test package to run
+
     --node=lts_latest
+      Node.js version to use
+
     --duration=60
+      Duration of the load test in seconds
+
     --overrides='{"express":"latest"}'
+      JSON string of package version overrides
+
     --config=./expf.config.json
+      Path to configuration file
+
     --[no-]write
     --output=./path/to/result.json
+    
     --[no-]parallel
+      Whether to run tests in parallel
 
   Runners:
     - @expressjs/perf-runner-vanilla: local docker based runner

@@ -38,7 +38,7 @@ export function help (opts = {}) {
       Path to configuration file
 
     --[no-]write
-      Whether to write results to disk
+      Whether to write results to file
 
     --output=./path/to/result.json
       Path to output file

@@ -117,6 +117,7 @@ The `load` command supports the following options:
 | `--overrides` | `-o` | - | JSON string with package overrides |
 | `--config` | `-c` | - | JSON string with package overrides |
 | `--[no-]write` | - | - | Write results file to disk |
+| `--output` | - | `/results/result-<timestamp>.json` | Output file path for results (implies write) |
 | `--force-rebuild` | - | - | For use with docker based runners, forces rebuilding container |
 
 #### Basic Commands
@@ -164,6 +165,56 @@ node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/pe
 
 # Node.js with New Relic APM (when available)
 node --run load -- --test="@expressjs/perf-load-example" --runner="@expressjs/perf-runner-newrelic"
+```
+
+#### Compare latest Express with a PR branch 
+
+##### Run benchmark against latest Express
+
+```bash
+node --run load -- --test="@expressjs/perf-load-extended-query" --overrides='{"express":"latest"}' --output=latest.json
+```
+
+##### Run benchmark against a PR branch
+
+PR from format:
+
+```txt
+<owner>/<repo>#<branch>
+```
+
+Example:
+
+```bash
+node --run load -- --test="@expressjs/perf-load-extended-query" --overrides='{"express":"GroophyLifefor/express#no-store-no-etag"}' --output=pr.json
+```
+
+##### Compare results
+
+```bash
+node --run compare -- latest.json pr.json
+```
+
+##### Example output
+
+```txt
+Comparison: B Wins
+==================
+{
+  diff: { rps: '-6.84%', throughput: '-6.83%', latency: '9.11%' },
+  a: {
+    avgRPS: 17562.6,
+    avgThroughput: 5918720,
+    avgLatency: 5.03,
+    status: { '200': { count: 1053729 } }
+  },
+  b: {
+    avgRPS: 18851.67,
+    avgThroughput: 6352725.34,
+    avgLatency: 4.61,
+    status: { '200': { count: 1131043 } }
+  }
+}
 ```
 
 ### Programmatic Usage

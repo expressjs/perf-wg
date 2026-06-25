@@ -70,3 +70,20 @@ The `--overrides` flag accepts a JSON object where keys are package names and va
 1. Apply the overrides to both direct dependencies and nested dependencies
 2. Generate a new package-lock.json for reproducibility
 3. Include the lock file in the test results for full transparency
+
+## Running Tests
+
+The CLI has a unit test suite using Node's built-in `node:test` runner. Run from the CLI package directory:
+
+```bash
+cd packages/cli
+npm test
+```
+
+Or from the project root via workspaces:
+
+```bash
+npm test --workspace=@expressjs/perf-cli
+```
+
+Tests cover CLI command behavior using mocked runners and dependencies — no real servers or network calls are needed.

@@ -40,6 +40,9 @@ export function help (opts = {}) {
     --[no-]write
       Whether to write results to file
 
+    --output=./path/to/result.json
+      Path to output file
+    
     --[no-]parallel
       Whether to run tests in parallel
 
@@ -174,8 +177,8 @@ export default function main (_opts = {}) {
       signal: ac.signal
     });
 
-    if (opts.write !== false) {
-      const outputFile = join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
+    if (opts.output != null || opts.write !== false) {
+      const outputFile = opts.output ?? join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
       await mkdir(dirname(outputFile), { recursive: true });
       await writeFile(outputFile, JSON.stringify(results, null, 2));
       console.log(`written to: ${outputFile}`);

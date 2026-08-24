@@ -12,30 +12,40 @@ on:
 
 jobs:
   baseline:
-    name: Run Baseline Load Tests
+    name: Run Baseline Load Tests (node ${{ matrix.node }})
+    strategy:
+      matrix:
+        node: [18, 20, 22, 24, 26]
     uses: ./.github/workflows/load.yml
     with:
       gitRef: ${{ github.event.pull_request.base.sha }}
-      node: 24.12.0
+      node: ${{ matrix.node }}
       test: '@expressjs/perf-load-example'
 
   test:
-    name: Run Test Load Tests
+    name: Run Test Load Tests (node ${{ matrix.node }})
+    strategy:
+      matrix:
+        node: [18, 20, 22, 24, 26]
     uses: ./.github/workflows/load.yml
     with:
       gitRef: ${{ github.event.pull_request.head.sha }}
-      node: 24.12.0
+      node: ${{ matrix.node }}
       test: '@expressjs/perf-load-example'
 
   compare:
-    name: Compare Load Tests
+    name: Compare Load Tests (node ${{ matrix.node }})
     needs: [baseline, test]
+    strategy:
+      matrix:
+        node: [18, 20, 22, 24, 26]
     uses: ./.github/workflows/compare.yml
     with:
       gitRef: ${{ github.event.pull_request.head.sha }}
       path: ./perf/load/example
       baselineId: ${{ needs.baseline.outputs.runId }}
       testId: ${{ needs.test.outputs.runId }}
+      node: ${{ matrix.node }}
     permissions:
       actions: read
 

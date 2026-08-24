@@ -1,7 +1,10 @@
 import compare from 'autocannon-compare';
 import autocannon from 'autocannon';
-import { normalize, join } from 'node:path';
+import { normalize, join, dirname } from 'node:path';
 import { inspect } from 'node:util';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function help () {
   return `$ expf compare [flags] <resultA> <resultB>
@@ -28,7 +31,7 @@ export default function main (_opts = {}, resultA, resultB) {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const opts = {
-      cwd: normalize(join(import.meta.dirname, '..', '..')),
+      cwd: normalize(join(__dirname, '..', '..')),
       ..._opts
     };
     // TODO: these are considered syntax errors according to semistandard, despite clearly not being so

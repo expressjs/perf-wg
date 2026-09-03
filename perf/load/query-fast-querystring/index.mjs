@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url';
+
 export async function requests () {
   return (await import('@expressjs/perf-requests/get-query')).default;
 }
@@ -25,6 +27,6 @@ export async function server () {
   });
 }
 
-if (import.meta.main || import.meta.filename === process.argv[1]) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   await server();
 }

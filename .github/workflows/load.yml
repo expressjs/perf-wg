@@ -24,7 +24,7 @@ on:
         value: ${{github.run_id}}
       artifactName:
         description: "Artifact name for results"
-        value: perf-load-test-${{github.run_id}}
+        value: perf-load-test-${{github.run_id}}-${{inputs.node}}
 
   workflow_dispatch:
     inputs:
@@ -78,6 +78,6 @@ jobs:
         id: upload-results
         uses: actions/upload-artifact@v4
         with:
-          name: perf-load-test-${{github.run_id}}
+          name: perf-load-test-${{github.run_id}}-${{inputs.node}}
           path: ./perf/load/*/results/result-*.json
           retention-days: 1

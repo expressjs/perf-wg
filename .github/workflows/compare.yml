@@ -16,6 +16,9 @@ on:
       testId:
         required: true
         type: string
+      node:
+        required: true
+        type: string
     outputs:
       summary:
         description: "Run id for fetching artifacts"
@@ -35,6 +38,9 @@ on:
         required: true
         type: string
       testId:
+        required: true
+        type: string
+      node:
         required: true
         type: string
 
@@ -61,7 +67,7 @@ jobs:
       - name: Download baseline results
         uses: actions/download-artifact@v4
         with:
-          name: perf-load-test-${{inputs.baselineId}}
+          name: perf-load-test-${{inputs.baselineId}}-${{inputs.node}}
           path: ${{inputs.path}}/..
           run-id: ${{inputs.baselineId}}
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -75,7 +81,7 @@ jobs:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
-          name: perf-load-test-${{inputs.testId}}
+          name: perf-load-test-${{inputs.testId}}-${{inputs.node}}
           path: ${{inputs.path}}/..
           run-id: ${{inputs.testId}}
           github-token: ${{secrets.GITHUB_TOKEN}}

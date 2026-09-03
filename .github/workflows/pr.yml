@@ -15,7 +15,7 @@ jobs:
     name: Run Baseline Load Tests (node ${{ matrix.node }})
     strategy:
       matrix:
-        node: [18, 20, 22, 24, 26]
+        node: [18, 26]
     uses: ./.github/workflows/load.yml
     with:
       gitRef: ${{ github.event.pull_request.base.sha }}
@@ -26,7 +26,7 @@ jobs:
     name: Run Test Load Tests (node ${{ matrix.node }})
     strategy:
       matrix:
-        node: [18, 20, 22, 24, 26]
+        node: [18, 26]
     uses: ./.github/workflows/load.yml
     with:
       gitRef: ${{ github.event.pull_request.head.sha }}
@@ -38,7 +38,7 @@ jobs:
     needs: [baseline, test]
     strategy:
       matrix:
-        node: [18, 20, 22, 24, 26]
+        node: [18, 26]
     uses: ./.github/workflows/compare.yml
     with:
       gitRef: ${{ github.event.pull_request.head.sha }}

@@ -29,6 +29,7 @@ $ expf load [flags]
     --test=example
     --node=lts_latest
     --overrides='{"express":"5.0.0"}'  # Override dependency versions for testing
+    --flamegraph                     # Include a CPU flamegraph (local runner)
 ```
 
 ```
@@ -42,6 +43,18 @@ $ expf compare [flags] <resultA> <resultB>
 ```
 
 ## Examples
+
+### CPU Flamegraphs
+
+```bash
+npm run load -- --node="$(node -p 'process.versions.node')" --flamegraph --output=results/profiled.json
+```
+
+This uses `@platformatic/flame` to profile the server and embeds its interactive HTML
+in `serverResults.flamegraph`, which the comparison dashboard already displays.
+Requires the local runner, Node.js >=22.6.0, Linux or macOS, and optional dependencies
+installed. Profiling is disabled by default because it adds overhead.
+See [CPU flamegraphs](../../README.md#cpu-flamegraphs) for viewing and extracting reports.
 
 ### Testing with Different Express Versions
 

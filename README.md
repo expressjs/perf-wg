@@ -114,6 +114,7 @@ The `load` command supports the following options:
 | `--test` | `-t` | `@expressjs/perf-load-example` | Test module to run |
 | `--node` | `-n` | `lts_latest` | Node.js version to use |
 | `--duration` | `-d` | `60` | Test duration in seconds |
+| `--flamegraph` | - | `false` | Include a CPU flamegraph in the result (local runner only) |
 | `--overrides` | `-o` | - | JSON string with package overrides |
 | `--config` | `-c` | - | JSON string with package overrides |
 | `--[no-]write` | - | - | Write results file to disk |
@@ -147,6 +148,36 @@ NSOLID_SAAS="XXX" node --run load -- --test="@expressjs/perf-load-example" --run
 # Compare results
 node --run compare -- result-A.json result-B.json
 ```
+
+#### CPU flamegraphs
+
+Use `--flamegraph` with the local runner to include an interactive CPU flamegraph
+from [`@platformatic/flame`](https://github.com/platformatic/flame) in the result:
+
+```bash
+npm run load -- --test=@expressjs/perf-load-example --node="$(node -p 'process.versions.node')" --flamegraph --output=results/profiled.json
+```
+
+Profiling requires Node.js **22.6.0 or newer**, Linux or macOS, and the optional
+dependencies installed by `npm install` (use `npm install --include=optional` if
+they were omitted). Run the command using the Node.js version being tested.
+Docker runners do not support this flag.
+
+The result includes `options.flamegraph: true` and the complete HTML document in
+`serverResults.flamegraph`. The existing dashboard displays it in the **Flamegraphs**
+section when this result is used as `dashboards/baseline.json` or
+`dashboards/current.json`. Serve the dashboard over HTTP to load the JSON files.
+JSON artifacts retain the flamegraph without needing separate profile files.
+
+To open a single report directly, extract its HTML:
+
+```bash
+node --input-type=module -e 'import fs from "node:fs"; const report = JSON.parse(fs.readFileSync("results/profiled.json", "utf8")); fs.writeFileSync("results/flamegraph.html", report.serverResults.flamegraph);'
+```
+
+Open `results/flamegraph.html` in a browser. Profiling adds overhead, so it is
+disabled by default. Use the same profiling setting for both sides of a comparison;
+use separate unprofiled runs when measuring throughput and latency regressions.
 
 #### Runner-Specific Examples
 

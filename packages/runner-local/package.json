@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/*.test.mjs"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,8 @@
     "@expressjs/perf-autocannon": "^1.0.0",
     "@expressjs/perf-metadata": "^1.0.0",
     "@expressjs/perf-wrk2": "^1.0.0"
+  },
+  "optionalDependencies": {
+    "@platformatic/flame": "^1.7.0"
   }
 }

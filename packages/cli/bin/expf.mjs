@@ -55,6 +55,10 @@ const { values, positionals } = parseArgs({
       default: false
     },
 
+    flamegraph: {
+      type: 'boolean'
+    },
+
     duration: {
       type: 'string',
       short: 'd'

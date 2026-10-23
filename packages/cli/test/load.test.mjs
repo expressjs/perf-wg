@@ -1,6 +1,6 @@
 import { mock, test, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { mkdtemp, rm, readFile, access } from 'node:fs/promises';
+import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -76,4 +76,11 @@ test('--no-write prints results to console instead of writing to file', async (t
     !logCalls.some(call => call.includes('written to:')),
     'console.log should NOT contain "written to:" when --no-write is set'
   );
+});
+
+test('--flamegraph rejects runners that cannot capture profiles', async () => {
+  await assert.rejects(main({
+    flamegraph: true,
+    runner: '@expressjs/perf-runner-vanilla'
+  }), /--flamegraph is supported only by @expressjs\/perf-runner-local/);
 });

@@ -49,6 +49,9 @@ export function help (opts = {}) {
     --[no-]parallel
       Whether to run tests in parallel
 
+    --flamegraph
+      Include a CPU flamegraph in the report (local runner, Node.js >=22.6.0)
+
   Runners:
     - @expressjs/perf-runner-vanilla: local docker based runner
       - Flags: --force-rebuild
@@ -104,6 +107,10 @@ export default function main (_opts = {}) {
       duration: 60,
       ..._opts
     };
+
+    if (opts.flamegraph && opts.runner !== '@expressjs/perf-runner-local') {
+      return reject(new Error('--flamegraph is supported only by @expressjs/perf-runner-local'));
+    }
 
     // Parse duration as integer if provided as string
     if (typeof opts.duration === 'string') {

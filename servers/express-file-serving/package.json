@@ -1,0 +1,14 @@
+{
+  "name": "@expressjs/perf-servers-express-file-serving",
+  "version": "1.0.0",
+  "exports": {
+    "./static": "./static.js",
+    "./send-file": "./send-file.js"
+  },
+  "scripts": {
+    "setup": "npm i"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

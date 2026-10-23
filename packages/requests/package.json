@@ -4,6 +4,7 @@
   "exports": {
     ".": "./index.mjs",
     "./get-basic-paths": "./get-basic-paths.mjs",
+    "./get-file": "./get-file.mjs",
     "./get-slash": "./get-slash.mjs",
     "./get-query": "./get-query.mjs",
     "./post-json": "./post-json.mjs"

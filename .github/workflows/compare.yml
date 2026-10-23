@@ -54,12 +54,12 @@ jobs:
     outputs:
       summary: ${{ steps.compare.outputs.summary }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{inputs.gitRef}}
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{inputs.node}}
 
@@ -67,7 +67,7 @@ jobs:
         run: npm install --ignore-scripts --include=dev
 
       - name: Download baseline results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           # A PR comparison uses one run; separate manual runs keep the default test name.
           name: perf-load-${{inputs.baselineId == inputs.testId && 'baseline' || 'test'}}-${{inputs.baselineId}}-${{inputs.node}}
@@ -82,7 +82,7 @@ jobs:
           echo "path=$(ls "${{inputs.path}}/results" | grep "result-.*\.json" | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: Download test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: perf-load-test-${{inputs.testId}}-${{inputs.node}}
           path: ${{inputs.path}}/..
@@ -113,7 +113,7 @@ jobs:
           cp "$GITHUB_STEP_SUMMARY" "$RUNNER_TEMP/comparison-$NODE_VERSION.md"
 
       - name: Upload comparison summary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: perf-compare-${{github.run_id}}-${{inputs.node}}
           path: ${{runner.temp}}/comparison-${{inputs.node}}.md

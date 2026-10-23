@@ -50,12 +50,12 @@ jobs:
     name: Load Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{inputs.gitRef}}
           persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{inputs.node}}
 
@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload results
         id: upload-results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           # Both PR jobs share a run ID, so distinguish the base ref from the head ref.
           name: perf-load-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}

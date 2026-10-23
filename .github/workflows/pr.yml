@@ -57,7 +57,7 @@ jobs:
     steps:
       # Matrix outputs contain only one result, so collect every report via artifacts.
       - name: Download comparison summaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: perf-compare-${{github.run_id}}-*
           path: ${{runner.temp}}/comparisons

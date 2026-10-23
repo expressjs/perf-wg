@@ -114,6 +114,7 @@ The `load` command supports the following options:
 | `--test` | `-t` | `@expressjs/perf-load-example` | Test module to run |
 | `--node` | `-n` | `lts_latest` | Node.js version to use |
 | `--duration` | `-d` | `60` | Test duration in seconds |
+| `--flamegraph` | - | `false` | Include a CPU flamegraph in the result (local runner only) |
 | `--overrides` | `-o` | - | JSON string with package overrides |
 | `--config` | `-c` | - | JSON string with package overrides |
 | `--[no-]write` | - | - | Write results file to disk |
@@ -147,6 +148,43 @@ NSOLID_SAAS="XXX" node --run load -- --test="@expressjs/perf-load-example" --run
 # Compare results
 node --run compare -- result-A.json result-B.json
 ```
+
+#### CPU flamegraphs
+
+Use `--flamegraph` with the local runner to include an interactive CPU flamegraph
+from [`@platformatic/flame`](https://github.com/platformatic/flame) in the result:
+
+```bash
+npm run load -- --test=@expressjs/perf-load-example --node="$(node -p 'process.versions.node')" --flamegraph --output=results/profiled.json
+```
+
+Profiling requires Node.js **22.6.0 or newer**, Linux or macOS, and the optional
+dependencies installed by `npm install` (use `npm install --include=optional` if
+they were omitted). Run the command using the Node.js version being tested.
+Docker runners do not support this flag.
+
+The command automatically writes both files:
+
+```text
+results/profiled.json
+results/profiled.flamegraph.html
+```
+
+Open `results/profiled.flamegraph.html` directly in a browser. The HTML file is saved
+next to the JSON with the same basename and a `.flamegraph.html` suffix. Use
+`--write` without `--output` to save both in the test package's `results` directory;
+the repository's default configuration disables writing unless requested.
+`--no-write` skips both files unless an explicit `--output` is provided.
+
+The JSON still includes `options.flamegraph: true` and the complete HTML document in
+`serverResults.flamegraph`. The existing dashboard displays it in the **Flamegraphs**
+section when this result is used as `dashboards/baseline.json` or
+`dashboards/current.json`. Serve the dashboard over HTTP to load the JSON files.
+JSON artifacts retain the flamegraph without needing separate profile files.
+
+Profiling adds overhead, so it is disabled by default.
+Use the same profiling setting for both sides of a comparison;
+use separate unprofiled runs when measuring throughput and latency regressions.
 
 #### Runner-Specific Examples
 
@@ -227,6 +265,35 @@ Comparison: B Wins
 - The reusable [Compare Load Tests workflow](.github/workflows/compare.yml) defaults
   `gitRef` to `main`. It requires `path`, `baselineId`, `testId`, and `node`, and returns
   the comparison report as Markdown through its `summary` output.
+
+#### Flamegraphs in Actions
+
+Manual **Load Test** runs enable the `flamegraph` input by default. In the Actions
+website, leave **Generate a CPU flamegraph** checked and use Node.js 22.6.0 or newer
+(the default is Node.js 24). From GitHub CLI:
+
+```bash
+gh workflow run load.yml --repo expressjs/perf-wg --ref main \
+  -f gitRef=main -f node=24 \
+  -f test=@expressjs/perf-load-example \
+  -F flamegraph=true
+```
+
+The workflow branch and `gitRef` must both include the flamegraph implementation.
+To test an unmerged branch, replace both `main` values with that branch name.
+Uncheck the option or pass `-F flamegraph=false` for an unprofiled run.
+
+The **Load Test** job summary includes a **Download flamegraph HTML** link to the
+`perf-flamegraphs-...` artifact. Download and extract the archive, then open its
+`.flamegraph.html` file in a browser. The JSON remains in the existing `perf-load-...`
+artifact and also contains the HTML for the dashboard. Both artifacts are retained
+for one day; GitHub requires signing in to download them.
+
+Reusable calls default to `flamegraph: false`. Set `flamegraph: true` under `with`
+and use a supported Node.js version; the `flamegraphArtifactUrl` output exposes the
+download link to the caller. The current automatic PR workflow leaves profiling
+disabled, including on Node.js 18. When comparing profiled runs, enable it on both
+base and candidate and select revisions that support `--flamegraph`.
 
 #### Passing dependency overrides
 

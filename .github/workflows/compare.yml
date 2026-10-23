@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       gitRef:
-        required: true
+        required: false
         type: string
         default: 'main'
         description: 'The git ref to checkout'
@@ -21,7 +21,7 @@ on:
         type: string
     outputs:
       summary:
-        description: "Run id for fetching artifacts"
+        description: "Comparison report in Markdown"
         value: ${{ jobs.load.outputs.summary }}
 
   workflow_dispatch:
@@ -51,6 +51,8 @@ jobs:
   load:
     name: Compare Load Tests
     runs-on: ubuntu-latest
+    outputs:
+      summary: ${{ steps.compare.outputs.summary }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -95,8 +97,25 @@ jobs:
 
       - name: Compare
         id: compare
+        env:
+          NODE_VERSION: ${{inputs.node}}
         run: |
+          echo "### Node.js $NODE_VERSION" >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           npm run compare -- "${{inputs.path}}/results/${{steps.baseline.outputs.path}}" "${{inputs.path}}/results/${{steps.test.outputs.path}}" >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "summary=\"$GITHUB_STEP_SUMMARY\" >> "$GITHUB_OUTPUT"
+          delimiter="summary-$(node -p 'require("node:crypto").randomUUID()')"
+          {
+            echo "summary<<$delimiter"
+            cat "$GITHUB_STEP_SUMMARY"
+            echo "$delimiter"
+          } >> "$GITHUB_OUTPUT"
+          cp "$GITHUB_STEP_SUMMARY" "$RUNNER_TEMP/comparison-$NODE_VERSION.md"
+
+      - name: Upload comparison summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-compare-${{github.run_id}}-${{inputs.node}}
+          path: ${{runner.temp}}/comparison-${{inputs.node}}.md
+          retention-days: 1
+          if-no-files-found: error

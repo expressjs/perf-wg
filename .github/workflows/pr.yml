@@ -2,7 +2,8 @@ name: PR
 on:
   pull_request:
     paths:
-      - 'package[-lock].json'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/**'
       - 'expf.config.json'
       - 'packages/**'
@@ -54,4 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [compare]
     steps:
-      - run: echo ${{ needs.compare.outputs.summary }} >> "$GITHUB_STEP_SUMMARY"
+      # Matrix outputs contain only one result, so collect every report via artifacts.
+      - name: Download comparison summaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: perf-compare-${{github.run_id}}-*
+          path: ${{runner.temp}}/comparisons
+          merge-multiple: true
+      - name: Publish summary
+        run: cat "$RUNNER_TEMP"/comparisons/*.md >> "$GITHUB_STEP_SUMMARY"

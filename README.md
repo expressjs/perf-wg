@@ -217,6 +217,17 @@ Comparison: B Wins
 }
 ```
 
+### GitHub Actions
+
+- The [PR workflow](.github/workflows/pr.yml) compares the pull request's base and head
+  commits on Node.js 18 and 26. Both comparison reports appear in the `Summary` job.
+- When calling the reusable [Load Test workflow](.github/workflows/load.yml), `gitRef`,
+  `node`, and `test` are optional and default to `main`, `24`, and
+  `@expressjs/perf-load-example`, respectively.
+- The reusable [Compare Load Tests workflow](.github/workflows/compare.yml) defaults
+  `gitRef` to `main`. It requires `path`, `baselineId`, `testId`, and `node`, and returns
+  the comparison report as Markdown through its `summary` output.
+
 ### Programmatic Usage
 
 #### Basic Import and Usage

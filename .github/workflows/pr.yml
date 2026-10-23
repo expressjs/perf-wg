@@ -49,10 +49,3 @@ jobs:
       node: ${{ matrix.node }}
     permissions:
       actions: read
-
-  summary:
-    name: Summary
-    runs-on: ubuntu-latest
-    needs: [compare]
-    steps:
-      - run: echo ${{ needs.compare.outputs.summary }} >> "$GITHUB_STEP_SUMMARY"

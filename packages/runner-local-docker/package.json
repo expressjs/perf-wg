@@ -21,11 +21,11 @@
   "dependencies": {
     "@expressjs/perf-metadata": "^1.0.0",
     "@expressjs/perf-requests": "^1.0.0",
-    "@pkgjs/nv": "^0.2.2"
+    "@pkgjs/nv": "^0.3.0"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "rollup": "^4.59.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "rollup": "^4.64.12",
     "semistandard": "^17.0.0"
   }
 }

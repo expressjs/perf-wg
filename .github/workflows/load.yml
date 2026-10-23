@@ -63,6 +63,8 @@ jobs:
         run: npm install --ignore-scripts --include=dev
 
       - name: Run load test
+        env:
+          OVERRIDES: ${{inputs.overrides || '{}'}}
         run: |
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           npm run load -- \
@@ -70,7 +72,7 @@ jobs:
             --parallel \
             --test="${{inputs.test}}" \
             --node="${{inputs.node}}" \
-            --overrides="${{inputs.overrides || '{}'}}" \
+            --overrides="$OVERRIDES" \
             >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
 

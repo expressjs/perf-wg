@@ -228,6 +228,71 @@ Comparison: B Wins
   `gitRef` to `main`. It requires `path`, `baselineId`, `testId`, and `node`, and returns
   the comparison report as Markdown through its `summary` output.
 
+#### Passing dependency overrides
+
+The **Load Test** workflow accepts an optional `overrides` input containing a JSON
+object of package names and version specifiers. Leave it empty or use `{}` to keep
+the test's declared dependencies. To test an Express commit, use
+`expressjs/express#<commit-sha>` and replace `<commit-sha>` with the full commit SHA.
+
+`gitRef` selects the revision of **perf-wg** containing the benchmark code.
+Use `overrides` to select the Express version or commit being measured.
+
+##### From GitHub CLI (`gh`)
+
+With [GitHub CLI](https://cli.github.com/manual/gh_workflow_run) installed and
+authenticated to an account with write access to the repository, run:
+
+```bash
+# Test a published Express version
+gh workflow run load.yml --repo expressjs/perf-wg --ref main \
+  -f gitRef=main \
+  -f node=24 \
+  -f test=@expressjs/perf-load-example \
+  -f 'overrides={"express":"5.1.0"}'
+```
+
+```bash
+# Test an Express commit (replace <commit-sha> before running)
+gh workflow run load.yml --repo expressjs/perf-wg --ref main \
+  -f gitRef=main \
+  -f node=24 \
+  -f test=@expressjs/perf-load-example \
+  -f 'overrides={"express":"expressjs/express#<commit-sha>"}'
+```
+
+In Bash, keep the single quotes around the `overrides=...` argument so that the JSON
+double quotes reach GitHub intact. `--ref` selects the branch or tag containing the
+workflow definition; `gitRef` selects the benchmark revision checked out by that
+workflow. Change `--repo` when running in a fork.
+
+##### From the GitHub Actions website
+
+1. Open the repository's **Actions** tab and select
+   [**Load Test**](https://github.com/expressjs/perf-wg/actions/workflows/load.yml).
+2. Click **Run workflow** and select the branch containing the workflow, normally `main`.
+3. Set `gitRef` to `main`, `node` to `24`, and `test` to `@expressjs/perf-load-example`,
+   or choose another benchmark configuration.
+4. In `overrides`, paste a JSON object such as one of these:
+
+   | Selection | Value for the `overrides` field |
+   |-----------|--------------------------------|
+   | Published version | `{"express":"5.1.0"}` |
+   | Commit | `{"express":"expressjs/express#<commit-sha>"}` |
+   | Multiple packages | `{"express":"5.1.0","qs":"6.13.0"}` |
+
+   Keep the JSON double quotes, but omit the surrounding shell single quotes and
+   the `overrides=` prefix used in the CLI examples. Replace `<commit-sha>` with an
+   actual full SHA when using the commit example.
+5. Click **Run workflow** to start the load test.
+
+Manual runs require write access, and the workflow must exist on the default
+branch. See [GitHub's manual run guide](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+
+Results appear in the run's summary, with JSON files under **Artifacts**. Each run
+tests one dependency selection. To compare versions or commits, run once for each
+selection with the same `node` and `test`, then pass their run IDs to **Compare Load Tests**.
+
 ### Programmatic Usage
 
 #### Basic Import and Usage

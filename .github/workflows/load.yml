@@ -3,16 +3,19 @@ on:
   workflow_call:
     inputs:
       gitRef:
-        required: true
+        required: false
         type: string
+        default: 'main'
         description: 'The git ref to checkout'
       node:
-        required: true
+        required: false
         type: string
+        default: '24'
         description: 'Node version to use, accepts semver ranges and some aliases like latest_lts'
       test:
-        required: true
+        required: false
         type: string
+        default: '@expressjs/perf-load-example'
       overrides:
         type: string
     outputs:

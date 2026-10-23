@@ -49,3 +49,18 @@ jobs:
       node: ${{ matrix.node }}
     permissions:
       actions: read
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [compare]
+    steps:
+      # Matrix outputs contain only one result, so collect every report via artifacts.
+      - name: Download comparison summaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: perf-compare-${{github.run_id}}-*
+          path: ${{runner.temp}}/comparisons
+          merge-multiple: true
+      - name: Publish summary
+        run: cat "$RUNNER_TEMP"/comparisons/*.md >> "$GITHUB_STEP_SUMMARY"

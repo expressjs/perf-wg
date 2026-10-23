@@ -1,8 +1,11 @@
 import { execFile } from 'node:child_process';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { startLoad } from '@expressjs/perf-requests';
 import { collectMetadata } from '@expressjs/perf-metadata';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function createRunner (runnerConfig = {}) {
   const {
@@ -26,9 +29,9 @@ export function createRunner (runnerConfig = {}) {
         args.push('--force');
       }
       const cp = execFile(
-        join(import.meta.dirname, 'scripts', 'build.sh'),
+        join(__dirname, 'scripts', 'build.sh'),
         args,
-        { cwd: import.meta.dirname }
+        { cwd: __dirname }
       );
 
       cp.on('exit', () => {
@@ -73,7 +76,7 @@ export function createRunner (runnerConfig = {}) {
       args.push(envVars.DD_API_KEY || '');
 
       const cp = execFile(
-        join(import.meta.dirname, 'scripts', 'run.sh'),
+        join(__dirname, 'scripts', 'run.sh'),
         args,
         { env: { ...process.env, ...envVars } }
       );

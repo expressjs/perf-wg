@@ -1,7 +1,10 @@
 import { normalize, join, dirname } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import nv from '@pkgjs/nv';
 import autocannon from 'autocannon';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export function help (opts = {}) {
   return `$ expf load [flags]
@@ -10,7 +13,7 @@ export function help (opts = {}) {
 
   Flags:
 
-    --cwd=${opts.cwd || normalize(join(import.meta.dirname, '..', '..'))}
+    --cwd=${opts.cwd || normalize(join(__dirname, '..', '..'))}
       Working directory for the project
 
     --runner=@expressjs/perf-runner-local
@@ -67,7 +70,7 @@ export default function main (_opts = {}) {
     return;
   }
   return new Promise(async (resolve, reject) => {
-    const cwd = normalize(join(import.meta.dirname, '..', '..'));
+    const cwd = normalize(join(__dirname, '..', '..'));
 
     let conf = {};
     try {

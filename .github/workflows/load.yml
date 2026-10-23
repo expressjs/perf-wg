@@ -24,7 +24,7 @@ on:
         value: ${{github.run_id}}
       artifactName:
         description: "Artifact name for results"
-        value: perf-load-test-${{github.run_id}}-${{inputs.node}}
+        value: perf-load-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}
 
   workflow_dispatch:
     inputs:
@@ -78,6 +78,7 @@ jobs:
         id: upload-results
         uses: actions/upload-artifact@v4
         with:
-          name: perf-load-test-${{github.run_id}}-${{inputs.node}}
+          # Both PR jobs share a run ID, so distinguish the base ref from the head ref.
+          name: perf-load-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}
           path: ./perf/load/*/results/result-*.json
           retention-days: 1

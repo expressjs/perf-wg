@@ -67,7 +67,8 @@ jobs:
       - name: Download baseline results
         uses: actions/download-artifact@v4
         with:
-          name: perf-load-test-${{inputs.baselineId}}-${{inputs.node}}
+          # A PR comparison uses one run; separate manual runs keep the default test name.
+          name: perf-load-${{inputs.baselineId == inputs.testId && 'baseline' || 'test'}}-${{inputs.baselineId}}-${{inputs.node}}
           path: ${{inputs.path}}/..
           run-id: ${{inputs.baselineId}}
           github-token: ${{secrets.GITHUB_TOKEN}}

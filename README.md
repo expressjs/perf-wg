@@ -266,6 +266,35 @@ Comparison: B Wins
   `gitRef` to `main`. It requires `path`, `baselineId`, `testId`, and `node`, and returns
   the comparison report as Markdown through its `summary` output.
 
+#### Flamegraphs in Actions
+
+Manual **Load Test** runs enable the `flamegraph` input by default. In the Actions
+website, leave **Generate a CPU flamegraph** checked and use Node.js 22.6.0 or newer
+(the default is Node.js 24). From GitHub CLI:
+
+```bash
+gh workflow run load.yml --repo expressjs/perf-wg --ref main \
+  -f gitRef=main -f node=24 \
+  -f test=@expressjs/perf-load-example \
+  -F flamegraph=true
+```
+
+The workflow branch and `gitRef` must both include the flamegraph implementation.
+To test an unmerged branch, replace both `main` values with that branch name.
+Uncheck the option or pass `-F flamegraph=false` for an unprofiled run.
+
+The **Load Test** job summary includes a **Download flamegraph HTML** link to the
+`perf-flamegraphs-...` artifact. Download and extract the archive, then open its
+`.flamegraph.html` file in a browser. The JSON remains in the existing `perf-load-...`
+artifact and also contains the HTML for the dashboard. Both artifacts are retained
+for one day; GitHub requires signing in to download them.
+
+Reusable calls default to `flamegraph: false`. Set `flamegraph: true` under `with`
+and use a supported Node.js version; the `flamegraphArtifactUrl` output exposes the
+download link to the caller. The current automatic PR workflow leaves profiling
+disabled, including on Node.js 18. When comparing profiled runs, enable it on both
+base and candidate and select revisions that support `--flamegraph`.
+
 #### Passing dependency overrides
 
 The **Load Test** workflow accepts an optional `overrides` input containing a JSON

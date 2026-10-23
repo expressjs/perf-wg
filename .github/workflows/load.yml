@@ -18,6 +18,11 @@ on:
         default: '@expressjs/perf-load-example'
       overrides:
         type: string
+      flamegraph:
+        required: false
+        type: boolean
+        default: false
+        description: 'Generate a CPU flamegraph (requires Node.js >=22.6.0)'
     outputs:
       runId:
         description: "Run id for fetching artifacts"
@@ -25,6 +30,9 @@ on:
       artifactName:
         description: "Artifact name for results"
         value: perf-load-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}
+      flamegraphArtifactUrl:
+        description: 'Download URL for the flamegraph artifact, when enabled'
+        value: ${{jobs.load.outputs.flamegraphArtifactUrl}}
 
   workflow_dispatch:
     inputs:
@@ -44,11 +52,18 @@ on:
         default: '@expressjs/perf-load-example'
       overrides:
         type: string
+      flamegraph:
+        required: false
+        type: boolean
+        default: true
+        description: 'Generate a CPU flamegraph (requires Node.js >=22.6.0)'
 
 jobs:
   load:
     name: Load Test
     runs-on: ubuntu-latest
+    outputs:
+      flamegraphArtifactUrl: ${{steps.upload-flamegraphs.outputs.artifact-url}}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -60,19 +75,27 @@ jobs:
           node-version: ${{inputs.node}}
 
       - name: Install dependencies
-        run: npm install --ignore-scripts --include=dev
+        run: npm install --ignore-scripts --include=dev --include=optional
 
       - name: Run load test
         env:
           OVERRIDES: ${{inputs.overrides || '{}'}}
+          FLAMEGRAPH: ${{inputs.flamegraph}}
+          TEST: ${{inputs.test}}
+          NODE_VERSION: ${{inputs.node}}
         run: |
+          profile_args=()
+          if [[ "$FLAMEGRAPH" == "true" ]]; then
+            profile_args+=(--flamegraph)
+          fi
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
           npm run load -- \
             --write \
             --parallel \
-            --test="${{inputs.test}}" \
-            --node="${{inputs.node}}" \
+            --test="$TEST" \
+            --node="$NODE_VERSION" \
             --overrides="$OVERRIDES" \
+            "${profile_args[@]}" \
             >> "$GITHUB_STEP_SUMMARY"
           echo "\`\`\`" >> "$GITHUB_STEP_SUMMARY"
 
@@ -84,3 +107,25 @@ jobs:
           name: perf-load-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}
           path: ./perf/load/*/results/result-*.json
           retention-days: 1
+
+      - name: Upload flamegraphs
+        if: ${{inputs.flamegraph}}
+        id: upload-flamegraphs
+        uses: actions/upload-artifact@v7
+        with:
+          name: perf-flamegraphs-${{inputs.gitRef == github.event.pull_request.base.sha && 'baseline' || 'test'}}-${{github.run_id}}-${{inputs.node}}
+          path: ./perf/load/*/results/result-*.flamegraph.html
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Publish flamegraph link
+        if: ${{inputs.flamegraph}}
+        env:
+          FLAMEGRAPH_URL: ${{steps.upload-flamegraphs.outputs.artifact-url}}
+        run: |
+          {
+            echo '### CPU flamegraph'
+            printf '[Download flamegraph HTML](%s)\n\n' "$FLAMEGRAPH_URL"
+            echo 'Extract the downloaded archive and open the .flamegraph.html file in your browser.'
+            echo 'Profiling was enabled for this run; use the same setting for both sides of a comparison.'
+          } >> "$GITHUB_STEP_SUMMARY"

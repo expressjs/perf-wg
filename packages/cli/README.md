@@ -50,11 +50,15 @@ $ expf compare [flags] <resultA> <resultB>
 npm run load -- --node="$(node -p 'process.versions.node')" --flamegraph --output=results/profiled.json
 ```
 
-This uses `@platformatic/flame` to profile the server and embeds its interactive HTML
-in `serverResults.flamegraph`, which the comparison dashboard already displays.
+This uses `@platformatic/flame` to profile the server and automatically writes
+`results/profiled.json` and `results/profiled.flamegraph.html`. Open the HTML file
+directly in a browser. The JSON also keeps the HTML in `serverResults.flamegraph`
+for the comparison dashboard. Use `--write` without `--output` to save both files in
+the test package's `results` directory. The repository disables writing by default.
+`--no-write` skips both unless `--output` is provided.
 Requires the local runner, Node.js >=22.6.0, Linux or macOS, and optional dependencies
 installed. Profiling is disabled by default because it adds overhead.
-See [CPU flamegraphs](../../README.md#cpu-flamegraphs) for viewing and extracting reports.
+See [CPU flamegraphs](../../README.md#cpu-flamegraphs) for viewing reports.
 
 ### Testing with Different Express Versions
 

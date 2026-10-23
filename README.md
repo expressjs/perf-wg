@@ -163,20 +163,27 @@ dependencies installed by `npm install` (use `npm install --include=optional` if
 they were omitted). Run the command using the Node.js version being tested.
 Docker runners do not support this flag.
 
-The result includes `options.flamegraph: true` and the complete HTML document in
+The command automatically writes both files:
+
+```text
+results/profiled.json
+results/profiled.flamegraph.html
+```
+
+Open `results/profiled.flamegraph.html` directly in a browser. The HTML file is saved
+next to the JSON with the same basename and a `.flamegraph.html` suffix. Use
+`--write` without `--output` to save both in the test package's `results` directory;
+the repository's default configuration disables writing unless requested.
+`--no-write` skips both files unless an explicit `--output` is provided.
+
+The JSON still includes `options.flamegraph: true` and the complete HTML document in
 `serverResults.flamegraph`. The existing dashboard displays it in the **Flamegraphs**
 section when this result is used as `dashboards/baseline.json` or
 `dashboards/current.json`. Serve the dashboard over HTTP to load the JSON files.
 JSON artifacts retain the flamegraph without needing separate profile files.
 
-To open a single report directly, extract its HTML:
-
-```bash
-node --input-type=module -e 'import fs from "node:fs"; const report = JSON.parse(fs.readFileSync("results/profiled.json", "utf8")); fs.writeFileSync("results/flamegraph.html", report.serverResults.flamegraph);'
-```
-
-Open `results/flamegraph.html` in a browser. Profiling adds overhead, so it is
-disabled by default. Use the same profiling setting for both sides of a comparison;
+Profiling adds overhead, so it is disabled by default.
+Use the same profiling setting for both sides of a comparison;
 use separate unprofiled runs when measuring throughput and latency regressions.
 
 #### Runner-Specific Examples

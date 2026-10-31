@@ -1,8 +1,9 @@
 import { mock, test, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { mkdtemp, rm, readFile, access } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 
 mock.module('@pkgjs/nv', {
   defaultExport: async () => [{ version: '22.0.0' }]
@@ -15,6 +16,14 @@ mock.module('autocannon', {
 });
 
 const mockRunnerPath = import.meta.resolve('./fixtures/mock-runner.mjs');
+const { default: mockRunner } = await import(mockRunnerPath);
+const flamegraphHTML = '<!doctype html><html><body>CPU flamegraph</body></html>';
+mock.module('@expressjs/perf-runner-local', {
+  defaultExport: async (opts) => ({
+    ...await mockRunner(opts),
+    serverResults: opts.flamegraph ? { flamegraph: flamegraphHTML } : {}
+  })
+});
 const loadModule = await import('../load.mjs');
 const { default: main } = loadModule;
 
@@ -48,6 +57,7 @@ test('--output writes results to the specified file', async (t) => {
   assert.strictEqual(parsed.clientResults.length, 1);
   assert.strictEqual(parsed.clientResults[0].url, 'http://localhost:3000/');
   assert.strictEqual(parsed.clientResults[0]['2xx'], 1000);
+  assert.deepStrictEqual(await readdir(tmpDir), ['result.json']);
 });
 
 test('--no-write prints results to console instead of writing to file', async (t) => {
@@ -76,4 +86,58 @@ test('--no-write prints results to console instead of writing to file', async (t
     !logCalls.some(call => call.includes('written to:')),
     'console.log should NOT contain "written to:" when --no-write is set'
   );
+});
+
+test('--flamegraph rejects runners that cannot capture profiles', async () => {
+  await assert.rejects(main({
+    flamegraph: true,
+    runner: '@expressjs/perf-runner-vanilla'
+  }), /--flamegraph is supported only by @expressjs\/perf-runner-local/);
+});
+
+for (const [filename, htmlFilename] of [
+  ['profiled.json', 'profiled.flamegraph.html'],
+  ['profiled', 'profiled.flamegraph.html'],
+  ['profiled.flamegraph.html', 'profiled.flamegraph.html.flamegraph.html']
+]) {
+  test(`--flamegraph writes a separate HTML file alongside ${filename}`, async t => {
+    tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+    const outputDir = join(tmpDir, 'nested results');
+    const logSpy = t.mock.method(console, 'log', () => {});
+
+    await main({
+      output: join(outputDir, filename),
+      flamegraph: true,
+      write: false
+    });
+
+    const report = JSON.parse(await readFile(join(outputDir, filename), 'utf8'));
+    const html = await readFile(join(outputDir, htmlFilename), 'utf8');
+    assert.strictEqual(html, flamegraphHTML);
+    assert.strictEqual(report.serverResults.flamegraph, html);
+    assert.ok(logSpy.mock.calls.some(call =>
+      call.arguments[0] === `flamegraph written to: ${join(outputDir, htmlFilename)}`
+    ));
+  });
+}
+
+test('--flamegraph uses the default results directory and respects --no-write', async t => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf test-'));
+  const testFile = join(tmpDir, 'index.mjs');
+  await writeFile(testFile, '');
+  const test = pathToFileURL(testFile).href;
+  t.mock.method(console, 'log', () => {});
+
+  await main({ test, flamegraph: true, write: false });
+  assert.deepStrictEqual(await readdir(tmpDir), ['index.mjs']);
+
+  await main({ test, flamegraph: true, write: true });
+  const resultsDir = join(tmpDir, 'results');
+  const files = await readdir(resultsDir);
+  const jsonFile = files.find(file => /^result-\d+\.json$/.test(file));
+  assert.ok(jsonFile);
+  const htmlFile = jsonFile.replace('.json', '.flamegraph.html');
+  assert.deepStrictEqual(files.sort(), [jsonFile, htmlFile].sort());
+  const report = JSON.parse(await readFile(join(resultsDir, jsonFile), 'utf8'));
+  assert.strictEqual(await readFile(join(resultsDir, htmlFile), 'utf8'), report.serverResults.flamegraph);
 });

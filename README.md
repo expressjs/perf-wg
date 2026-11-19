@@ -115,10 +115,29 @@ The `load` command supports the following options:
 | `--node` | `-n` | `lts_latest` | Node.js version to use |
 | `--duration` | `-d` | `60` | Test duration in seconds |
 | `--overrides` | `-o` | - | JSON string with package overrides |
-| `--config` | `-c` | - | JSON string with package overrides |
+| `--config` | `-c` | `expf.config.json` | Path to a JSON configuration file (see below) |
+| `--[no-]parallel` | - | - | Run every request in the test instead of only the first |
 | `--[no-]write` | - | - | Write results file to disk |
 | `--output` | - | `/results/result-<timestamp>.json` | Output file path for results (implies write) |
 | `--force-rebuild` | - | - | For use with docker based runners, forces rebuilding container |
+
+#### Configuration File
+
+The options above, other than `--config` itself, can also be set in a JSON configuration
+file, using the camel case option name as the key (for example `repoRef` for `--repo-ref`). By default the
+CLI loads `expf.config.json` from the root of the repository if it exists; use
+`--config` to load a different file. Relative `--config` paths are resolved from the
+root of the repository. Options passed on the command line take precedence over the
+configuration file.
+
+```json
+{
+  "write": false,
+  "duration": 30,
+  "parallel": true,
+  "overrides": { "express": "5.0.0" }
+}
+```
 
 #### Basic Commands
 

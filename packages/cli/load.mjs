@@ -93,6 +93,10 @@ export default function main (_opts = {}) {
       }
     }
 
+    // Flags which were not passed are undefined, they should not
+    // replace the values from the config file
+    const flags = Object.fromEntries(Object.entries(_opts).filter(([, v]) => v !== undefined));
+
     const opts = {
       cwd,
       repo: null, // 'https://github.com/expressjs/perf-wg.git',
@@ -100,9 +104,9 @@ export default function main (_opts = {}) {
       runner: '@expressjs/perf-runner-local',
       test: '@expressjs/perf-load-example',
       node: 'lts_latest',
-      ...conf,
       duration: 60,
-      ..._opts
+      ...conf,
+      ...flags
     };
 
     // Parse duration as integer if provided as string

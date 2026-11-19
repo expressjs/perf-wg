@@ -1,6 +1,6 @@
-import { normalize, join, dirname } from 'node:path';
+import { normalize, join, dirname, resolve as resolvePath } from 'node:path';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import nv from '@pkgjs/nv';
 import autocannon from 'autocannon';
 
@@ -74,8 +74,8 @@ export default function main (_opts = {}) {
 
     let conf = {};
     try {
-      const configPath = join(cwd, _opts.config || 'expf.config.json');
-      conf = (await import(configPath, {
+      const configUrl = pathToFileURL(resolvePath(cwd, _opts.config || 'expf.config.json')).href;
+      conf = (await import(configUrl, {
         with: {
           type: 'json'
         }
@@ -181,7 +181,7 @@ export default function main (_opts = {}) {
     });
 
     if (opts.output != null || opts.write !== false) {
-      const outputFile = opts.output ?? join(dirname(import.meta.resolve(opts.test).replace(/^file:/, '')), 'results', 'result-' + Date.now() + '.json');
+      const outputFile = opts.output ?? join(dirname(fileURLToPath(import.meta.resolve(opts.test))), 'results', 'result-' + Date.now() + '.json');
       await mkdir(dirname(outputFile), { recursive: true });
       await writeFile(outputFile, JSON.stringify(results, null, 2));
       console.log(`written to: ${outputFile}`);

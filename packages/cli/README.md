@@ -41,6 +41,9 @@ $ expf compare [flags] <resultA> <resultB>
     --cwd
 ```
 
+Results for tests that send multiple requests are matched by request URL, and each
+request is compared separately.
+
 ## Examples
 
 ### Testing with Different Express Versions

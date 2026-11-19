@@ -1,8 +1,8 @@
 import compare from 'autocannon-compare';
 import autocannon from 'autocannon';
-import { normalize, join, dirname } from 'node:path';
+import { normalize, join, dirname, resolve as resolvePath } from 'node:path';
 import { inspect } from 'node:util';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -36,8 +36,8 @@ export default function main (_opts = {}, resultA, resultB) {
     };
     // TODO: these are considered syntax errors according to semistandard, despite clearly not being so
     // likely an old version of eslint parsing under the hood. Just leaving for now.
-    let a = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
-    let b = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
+    let a = (await import(pathToFileURL(resolvePath(opts.cwd, resultA)).href, { with: { type: 'json' } })).default.clientResults;
+    let b = (await import(pathToFileURL(resolvePath(opts.cwd, resultB)).href, { with: { type: 'json' } })).default.clientResults;
 
     // Combine multiple results
     if (Array.isArray(a)) {

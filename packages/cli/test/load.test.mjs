@@ -1,7 +1,8 @@
 import { mock, test, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { mkdtemp, rm, readFile, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 
 mock.module('@pkgjs/nv', {
@@ -76,4 +77,42 @@ test('--no-write prints results to console instead of writing to file', async (t
     !logCalls.some(call => call.includes('written to:')),
     'console.log should NOT contain "written to:" when --no-write is set'
   );
+});
+
+test('--config accepts an absolute path', async (t) => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+  const configFile = join(tmpDir, 'expf.config.json');
+  const outputFile = join(tmpDir, 'result.json');
+  await writeFile(configFile, JSON.stringify({ output: outputFile }));
+
+  const ac = new AbortController();
+
+  await main({
+    config: configFile,
+    test: '@expressjs/perf-load-example',
+    runner: mockRunnerPath,
+    abortController: ac
+  });
+
+  const parsed = JSON.parse(await readFile(outputFile, 'utf-8'));
+  assert.ok(parsed.clientResults, 'results should be written to the output from the config file');
+});
+
+test('default results directory is next to the test when its path contains spaces', async (t) => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+  const testDir = join(tmpDir, 'my load test');
+  await mkdir(testDir);
+
+  const ac = new AbortController();
+
+  await main({
+    test: pathToFileURL(join(testDir, 'index.mjs')).href,
+    runner: mockRunnerPath,
+    abortController: ac,
+    write: true
+  });
+
+  const files = await readdir(join(testDir, 'results'));
+  assert.strictEqual(files.length, 1);
+  assert.match(files[0], /^result-\d+\.json$/);
 });

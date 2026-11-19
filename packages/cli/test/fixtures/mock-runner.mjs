@@ -4,6 +4,12 @@ export function help() {
 
 export default async function mockRunner(_opts) {
   return {
+    options: {
+      duration: _opts.duration,
+      repoRef: _opts.repoRef,
+      parallel: _opts.parallel,
+      forceRebuild: _opts.forceRebuild
+    },
     clientResults: [{
       url: 'http://localhost:3000/',
       '2xx': 1000,

@@ -1,0 +1,6 @@
+{
+  "duration": 5,
+  "repoRef": "config-ref",
+  "parallel": true,
+  "forceRebuild": true
+}

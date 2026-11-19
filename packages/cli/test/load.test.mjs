@@ -77,3 +77,78 @@ test('--no-write prints results to console instead of writing to file', async (t
     'console.log should NOT contain "written to:" when --no-write is set'
   );
 });
+
+// The config path is resolved relative to the root of the repo
+const configFile = 'packages/cli/test/fixtures/expf.config.json';
+
+test('--config options are passed to the runner', async (t) => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+  const outputFile = join(tmpDir, 'result.json');
+
+  const ac = new AbortController();
+
+  // Flags which were not passed on the command line are undefined
+  await main({
+    config: configFile,
+    output: outputFile,
+    test: '@expressjs/perf-load-example',
+    runner: mockRunnerPath,
+    abortController: ac,
+    duration: undefined,
+    repoRef: undefined,
+    parallel: undefined,
+    forceRebuild: undefined
+  });
+
+  const parsed = JSON.parse(await readFile(outputFile, 'utf-8'));
+  assert.deepStrictEqual(parsed.options, {
+    duration: 5,
+    repoRef: 'config-ref',
+    parallel: true,
+    forceRebuild: true
+  });
+});
+
+test('flags take precedence over --config options', async (t) => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+  const outputFile = join(tmpDir, 'result.json');
+
+  const ac = new AbortController();
+
+  await main({
+    config: configFile,
+    output: outputFile,
+    test: '@expressjs/perf-load-example',
+    runner: mockRunnerPath,
+    abortController: ac,
+    duration: '10',
+    repoRef: 'flag-ref',
+    parallel: false,
+    forceRebuild: false
+  });
+
+  const parsed = JSON.parse(await readFile(outputFile, 'utf-8'));
+  assert.deepStrictEqual(parsed.options, {
+    duration: 10,
+    repoRef: 'flag-ref',
+    parallel: false,
+    forceRebuild: false
+  });
+});
+
+test('duration defaults to 60 seconds', async (t) => {
+  tmpDir = await mkdtemp(join(tmpdir(), 'expf-test-'));
+  const outputFile = join(tmpDir, 'result.json');
+
+  const ac = new AbortController();
+
+  await main({
+    output: outputFile,
+    test: '@expressjs/perf-load-example',
+    runner: mockRunnerPath,
+    abortController: ac
+  });
+
+  const parsed = JSON.parse(await readFile(outputFile, 'utf-8'));
+  assert.strictEqual(parsed.options.duration, 60);
+});

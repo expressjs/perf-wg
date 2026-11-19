@@ -23,6 +23,44 @@ function header (strs, ...values) {
   return val + '\n' + Array(val.length).fill('=').join('');
 }
 
+function keyResults (results) {
+  const seen = new Map();
+  // Accept a list of results, a single result object, or nothing at all
+  return [].concat(results ?? []).map((result) => {
+    const url = result.url ?? '';
+    const n = seen.get(url) ?? 0;
+    seen.set(url, n + 1);
+    return { key: `${url}#${n}`, label: url || `request ${n + 1}`, result };
+  });
+}
+
+// Match up the result for each request in sample A with the result for
+// the same request in sample B. Results are matched by url, so the order
+// of requests may differ between the two samples. When a url appears
+// multiple times (ex. one result per load generator) the occurrences
+// are matched in order.
+export function pairResults (a, b) {
+  const keyedA = keyResults(a);
+  const unmatchedB = new Map(keyResults(b).map((r) => [r.key, r]));
+
+  const pairs = [];
+  for (const { key, label, result } of keyedA) {
+    const match = unmatchedB.get(key);
+    if (!match) {
+      console.warn(`No result for ${label} in sample B, skipping`);
+      continue;
+    }
+    unmatchedB.delete(key);
+    pairs.push({ label, a: result, b: match.result });
+  }
+
+  for (const { label } of unmatchedB.values()) {
+    console.warn(`No result for ${label} in sample A, skipping`);
+  }
+
+  return pairs;
+}
+
 export default function main (_opts = {}, resultA, resultB) {
   if (_opts.help) {
     console.log(help());
@@ -36,55 +74,52 @@ export default function main (_opts = {}, resultA, resultB) {
     };
     // TODO: these are considered syntax errors according to semistandard, despite clearly not being so
     // likely an old version of eslint parsing under the hood. Just leaving for now.
-    let a = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
-    let b = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
+    const resultsA = (await import(join(opts.cwd, resultA), { with: { type: 'json' } })).default.clientResults;
+    const resultsB = (await import(join(opts.cwd, resultB), { with: { type: 'json' } })).default.clientResults;
 
-    // Combine multiple results
-    if (Array.isArray(a)) {
-      console.warn('Aggregating results across multiple runs is not yet supported');
-      console.warn('comparing only the first result for sample A');
-      a = a[0];
-    }
-    if (Array.isArray(b)) {
-      console.warn('Aggregating results across multiple runs is not yet supported');
-      console.warn('comparing only the first result for sample B');
-      b = b[0];
+    const pairs = pairResults(resultsA, resultsB);
+    if (pairs.length === 0) {
+      return reject(new Error(`No matching requests found to compare between ${resultA} and ${resultB}`));
     }
 
-    const comp = compare(a, b);
+    for (const { label, a, b } of pairs) {
+      // Only label each section when there is more than one request to tell apart
+      const suffix = pairs.length > 1 ? ` (${label})` : '';
+      const comp = compare(a, b);
 
-    console.log(header`A Results: ${resultA}`);
-    console.log(autocannon.printResult(a));
+      console.log(header`A Results: ${resultA}${suffix}`);
+      console.log(autocannon.printResult(a));
 
-    console.log(header`B Results: ${resultB}`);
-    console.log(autocannon.printResult(b));
+      console.log(header`B Results: ${resultB}${suffix}`);
+      console.log(autocannon.printResult(b));
 
-    console.log(header`Comparison: ${comp.equal ? 'equal' : (comp.aWins) ? 'A Wins' : 'B Wins' }`);
-    console.log(inspect({
-      // ...comp,
-      diff: {
-        rps: comp.requests.difference,
-        throughput: comp.throughput.difference,
-        latency: comp.latency.difference
-      },
-      a: {
-        // ...a,
-        avgRPS: a.requests.average,
-        avgThroughput: a.throughput.average,
-        avgLatency: a.latency.average,
-        status: a.statusCodeStats
-      },
-      b: {
-        // ...b,
-        avgRPS: b.requests.average,
-        avgThroughput: b.throughput.average,
-        avgLatency: b.latency.average,
-        status: b.statusCodeStats
-      }
-    }, {
+      console.log(header`Comparison: ${comp.equal ? 'equal' : (comp.aWins) ? 'A Wins' : 'B Wins'}${suffix}`);
+      console.log(inspect({
+        // ...comp,
+        diff: {
+          rps: comp.requests.difference,
+          throughput: comp.throughput.difference,
+          latency: comp.latency.difference
+        },
+        a: {
+          // ...a,
+          avgRPS: a.requests.average,
+          avgThroughput: a.throughput.average,
+          avgLatency: a.latency.average,
+          status: a.statusCodeStats
+        },
+        b: {
+          // ...b,
+          avgRPS: b.requests.average,
+          avgThroughput: b.throughput.average,
+          avgLatency: b.latency.average,
+          status: b.statusCodeStats
+        }
+      }, {
         depth: 4,
         colors: true
-    }));
+      }));
+    }
     resolve();
   });
 }

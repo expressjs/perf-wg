@@ -217,6 +217,12 @@ Comparison: B Wins
 }
 ```
 
+When a test sends more than one request (for example with `--parallel`), each result file
+contains one result per request. `compare` matches the results by request URL and prints a
+separate comparison for each request, adding the URL to each heading, for example
+`Comparison: B Wins (http://localhost:3000/foo)`. Requests that appear in only one of the
+files are skipped with a warning.
+
 ### GitHub Actions
 
 - The [PR workflow](.github/workflows/pr.yml) compares the pull request's base and head
